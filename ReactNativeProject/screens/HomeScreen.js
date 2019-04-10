@@ -11,6 +11,7 @@ import {
 import { WebBrowser } from 'expo';
 
 import { MonoText } from '../components/StyledText';
+import MapView from 'react-native-maps';
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
