@@ -7,8 +7,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Modal,
+  TouchableHighlight
 } from 'react-native';
-import { WebBrowser } from 'expo';
+import { WebBrowser, MapView } from 'expo';
 
 import { MonoText } from '../components/StyledText';
 
@@ -16,11 +18,77 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
+  state = {
+    modalVisible: false,
+  };
+  setModalVisible(visible) {
+    this.setState({modalVisible: visible});
+  }
+
 
   render() {
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <MapView
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: 44.009690,
+            longitude: -73.177175,
+            latitudeDelta: 0.0052,
+            longitudeDelta: 0.011,
+          }}
+        />
+      <View style={{marginTop: 22}}>
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={this.state.modalVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+          }}>
+          <View style={{marginTop: 22}}>
+            <View>
+              <TouchableOpacity style={styles.saveButton} onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                  }}>
+                  <Text style={styles.saveButtonText}>Begin Rental</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                  }}>
+                  <Text style={styles.saveButtonText}>Report Missing</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                  }}>
+                  <Text style={styles.saveButtonText}>Report Damaged</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveButton} onPress={() => {
+                  this.setModalVisible(!this.state.modalVisible);
+                  }}>
+                  <Text style={styles.saveButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        <TouchableOpacity style={styles.saveButton} onPress={() => {
+            this.setModalVisible(true);
+          }}>
+              <Text style={styles.saveButtonText}>Bike</Text>
+          </TouchableOpacity>
+      </View>
+        {/* <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.welcomeContainer}></View>
+          <Text style={styles.getStartedText}>Welcome to Middlebury Bike Share!</Text>
+          <TouchableOpacity style={styles.saveButton} onPress={() => }>
+              <Text style={styles.saveButtonText}>Begin Ride</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={() => }>
+              <Text style={styles.saveButtonText}>Report Damaged</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={() => }>
+              <Text style={styles.saveButtonText}>Report Missing</Text>
+          </TouchableOpacity>
           <View style={styles.welcomeContainer}>
             <Image
               source={
@@ -59,10 +127,11 @@ export default class HomeScreen extends React.Component {
           <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
             <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
           </View>
-        </View>
+        </View> */}
       </View>
     );
   }
+
 
   _maybeRenderDevelopmentModeWarning() {
     if (__DEV__) {
@@ -185,4 +254,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e78b7',
   },
+  saveButton: {
+      borderWidth: 1,
+      borderColor: '#007BFF',
+      backgroundColor: '#007BFF',
+      padding: 15,
+      margin: 5
+    },
+    saveButtonText: {
+      color: '#FFFFFF',
+      fontSize: 20,
+      textAlign: 'center'
+    }
 });
