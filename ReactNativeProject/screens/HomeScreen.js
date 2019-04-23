@@ -8,14 +8,17 @@ import {
   TouchableOpacity,
   View,
   Modal,
-  TouchableHighlight
+  TouchableHighlight,
+  AsyncStorage,
+  Button
 } from 'react-native';
-import { WebBrowser, MapView } from 'expo';
+import { WebBrowser, MapView, Google } from 'expo';
 
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
+    title: 'Welcome to the app!',
     header: null,
   };
   state = {
@@ -71,6 +74,9 @@ export default class HomeScreen extends React.Component {
             </View>
           </View>
         </Modal>
+        <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
+              <Text style={styles.saveButtonText}>Sign Out</Text>
+          </TouchableOpacity>
         <TouchableOpacity style={styles.saveButton} onPress={() => {
             this.setModalVisible(true);
           }}>
@@ -155,6 +161,19 @@ export default class HomeScreen extends React.Component {
       );
     }
   }
+
+
+  _signOutAsync = async () => {
+    const clientId = '108117962987-96atlk0mjo5re9nasjarq2a7m7gnfbub.apps.googleusercontent.com';
+    try {
+        const token = await AsyncStorage.getItem('userToken');
+        this.props.navigation.navigate('Auth');
+        await Google.logOutAsync({ clientId, token });
+        await AsyncStorage.clear();
+  }catch(err) {
+    return {error: true};
+  }
+}
 
   _handleLearnMorePress = () => {
     WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
