@@ -10,28 +10,125 @@ import {
   Modal,
   TouchableHighlight,
   AsyncStorage,
-  Button
+  Button,
+  Alert,
+  RefreshControl
 } from 'react-native';
-import { WebBrowser, MapView, Google } from 'expo';
+import { WebBrowser, MapView, Google, Permissions, Location } from 'expo';
 
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.navigate = this.props.navigation.navigate;
+  }
+
   static navigationOptions = {
     title: 'Welcome to the app!',
     header: null,
   };
   state = {
+    location: null,
+    name: null,
     modalVisible: false,
+    bikeSelected: null,
+    bikesAvailable: null,
+    errorMessage: null,
+    refreshing: false,
   };
-  setModalVisible(visible) {
+
+  componentDidMount() {
+      AsyncStorage.getItem('first_name', (err, first_name) => {
+        if(err){console.log(err)}
+        else{this.setState({ name: first_name })};
+      })
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true});
+    this.getBikesAvailable().then(() => {
+      this.setState({refreshing: false});
+    });
+  }
+
+  setModalVisible = (visible) => {
     this.setState({modalVisible: visible});
   }
+
+  onNavigateRide = () => {
+    this.setModalVisible(!this.state.modalVisible);
+    this.navigate('Ride', {location: this.state.location, bikeId: this.state.bikeSelected});
+  };
+
+  beginRide = () => {
+
+  };
+  reportMissing = () => {
+
+  };
+  
+  reportDamaged = () => {
+    fetch('http://127.0.0.1:3000/rentals/', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: '5c87f94fc20223c1282fd8e1',
+        bike: '5ca274f279fcd42b80b375da',
+        startLocation: 'One Fine Place to find a bike',
+        reportDamaged: true,
+        reportMissing: false
+      }),
+    });
+  };
+
+  getBikesAvailable = () => {
+    return fetch('http://127.0.0.1:3000/bikes/')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let bikes = responseJson.bikes;
+        let availableBikes = [];
+        for (var i = 0; i < bikes.length; i++) {
+          if(bikes[i].status === 'Available'){
+            availableBikes.push(bikes[i]);
+          }
+        }
+        console.log(availableBikes);
+        return availableBikes;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  _getLocationAsync = async () => {
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        errorMessage: 'Permission to access location was denied',
+      });
+    }
+    let location = await Location.getCurrentPositionAsync({});
+    this.setState({ location });
+    console.log(JSON.stringify(this.state.location));
+  };
 
 
   render() {
     return (
       <View style={styles.container}>
+      <Text>Welcome {this.state.name}</Text>
+      {/* <ScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={this.state.refreshing}
+          onRefresh={this._onRefresh}
+        />
+      }> */}
         <MapView
           style={{ flex: 1 }}
           initialRegion={{
@@ -41,133 +138,92 @@ export default class HomeScreen extends React.Component {
             longitudeDelta: 0.011,
           }}
         />
-      <View style={{marginTop: 22}}>
-        <Modal
-          animationType="slide"
-          transparent={false}
-          visible={this.state.modalVisible}
-          onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
-          }}>
-          <View style={{marginTop: 22}}>
-            <View>
-              <TouchableOpacity style={styles.saveButton} onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                  }}>
-                  <Text style={styles.saveButtonText}>Begin Rental</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                  }}>
-                  <Text style={styles.saveButtonText}>Report Missing</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                  }}>
-                  <Text style={styles.saveButtonText}>Report Damaged</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={() => {
-                  this.setModalVisible(!this.state.modalVisible);
-                  }}>
-                  <Text style={styles.saveButtonText}>Cancel</Text>
-              </TouchableOpacity>
+        {/* </ScrollView> */}
+        <View style={{marginTop: 22}}>
+        
+          <Modal
+            onNavigateRide={this.onNavigateRide}
+            animationType="slide"
+            transparent={false}
+            visible={this.state.modalVisible}
+            onRequestClose={() => {
+              Alert.alert('Modal has been closed.');
+            }}>
+            <View style={{marginTop: 22}}>
+                <TouchableOpacity 
+                    style={styles.saveButton} 
+                    onPress={() => {this.onNavigateRide()}}>
+                              <Text style={styles.saveButtonText}>Begin Rental</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
+                          'Bike Number ' + this.state.bikeSelected,
+                          'Are you sure you would like to report this bike as Missing?',
+                          [
+                              {text: 'Yes', onPress: () => this.setModalVisible(!this.state.modalVisible)},
+                              {
+                              text: 'Cancel',
+                              onPress: () => console.log('Cancel Pressed'),
+                              style: 'cancel',
+                              }
+                          ],
+                          {cancelable: false},
+                )}>
+                              <Text style={styles.saveButtonText}>Report Missing</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
+                          'Bike Number ' + this.state.bikeSelected,
+                          'Are you sure you would like to report this bike as Damaged?',
+                          [
+                              {text: 'Yes', onPress: () => {
+                                this.setModalVisible(!this.state.modalVisible),
+                                this.reportDamaged()
+                              }},
+                              {
+                              text: 'Cancel',
+                              onPress: () => console.log('Cancel Pressed'),
+                              style: 'cancel',
+                              }
+                          ],
+                          {cancelable: false},
+                )}>
+                              <Text style={styles.saveButtonText}>Report Damaged</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.saveButton} onPress={() => {
+                    this.setModalVisible(!this.state.modalVisible);
+                    }}>
+                    <Text style={styles.saveButtonText}>Cancel</Text>
+                </TouchableOpacity>
             </View>
-          </View>
-        </Modal>
-        <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
-              <Text style={styles.saveButtonText}>Sign Out</Text>
+          </Modal>
+
+          <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
+                <Text style={styles.saveButtonText}>Sign Out</Text>
           </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={() => {
-            this.setModalVisible(true);
-          }}>
-              <Text style={styles.saveButtonText}>Bike</Text>
+
+          <TouchableOpacity style={styles.saveButton} onPress={() => {
+              this.setModalVisible(true);
+              this._getLocationAsync();
+              this.setState({bikeSelected: 123});
+            }}>
+                <Text style={styles.saveButtonText}>Bike</Text>
           </TouchableOpacity>
-      </View>
-        {/* <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.welcomeContainer}></View>
-          <Text style={styles.getStartedText}>Welcome to Middlebury Bike Share!</Text>
-          <TouchableOpacity style={styles.saveButton} onPress={() => }>
-              <Text style={styles.saveButtonText}>Begin Ride</Text>
+          
+          <TouchableOpacity style={styles.saveButton} onPress={this.getBikesAvailable}>
+                <Text style={styles.saveButtonText}>GetBikes</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={() => }>
-              <Text style={styles.saveButtonText}>Report Damaged</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={() => }>
-              <Text style={styles.saveButtonText}>Report Missing</Text>
-          </TouchableOpacity>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
-          </View>
+        </View>
 
-          <View style={styles.getStartedContainer}>
-            {this._maybeRenderDevelopmentModeWarning()}
-
-            <Text style={styles.getStartedText}>Get started by opening</Text>
-
-            <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-              <MonoText style={styles.codeHighlightText}>screens/HomeScreen.js</MonoText>
-            </View>
-
-            <Text style={styles.getStartedText}>
-              Change this text and your app will automatically reload WOOP WOOOP.
-            </Text>
-          </View>
-
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
-
-          <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
-          </View>
-        </View> */}
       </View>
     );
   }
 
-
-  _maybeRenderDevelopmentModeWarning() {
-    if (__DEV__) {
-      const learnMoreButton = (
-        <Text onPress={this._handleLearnMorePress} style={styles.helpLinkText}>
-          Learn more
-        </Text>
-      );
-
-      return (
-        <Text style={styles.developmentModeText}>
-          Development mode is enabled, your app will be slower but you can use useful development
-          tools. {learnMoreButton}
-        </Text>
-      );
-    } else {
-      return (
-        <Text style={styles.developmentModeText}>
-          You are not in development mode, your app will run at full speed.
-        </Text>
-      );
-    }
-  }
 
 
   _signOutAsync = async () => {
     const clientId = '108117962987-96atlk0mjo5re9nasjarq2a7m7gnfbub.apps.googleusercontent.com';
     try {
         const token = await AsyncStorage.getItem('userToken');
-        this.props.navigation.navigate('Auth');
+        this.navigate('Auth');
         await Google.logOutAsync({ clientId, token });
         await AsyncStorage.clear();
   }catch(err) {
@@ -175,14 +231,11 @@ export default class HomeScreen extends React.Component {
   }
 }
 
-  _handleLearnMorePress = () => {
-    WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
-  };
 
-  _handleHelpPress = () => {
-    WebBrowser.openBrowserAsync(
-      'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
-    );
+
+
+  startRide = () => {
+    this.navigate('Ride');
   };
 }
 

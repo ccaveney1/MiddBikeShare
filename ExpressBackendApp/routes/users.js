@@ -30,8 +30,8 @@ router.get('/:id', (req, res, next) => {
   })
 })
 
-// Get user by email
-//router.get('/email', (req, res, next) => {
+//Get user by email
+// router.get('/email', (req, res, next) => {
 //   let email = req.body.email;
 //   user.getUserByEmail(email, (err, user) => {
 //     if(err){
@@ -44,7 +44,7 @@ router.get('/:id', (req, res, next) => {
 //   })
 // })
 
-// Add user
+// Add user (only if email isn't already in database)
 router.post('/', (req,res,next) => {
   let newUser = new user({
       first_name: req.body.first_name,
@@ -52,15 +52,25 @@ router.post('/', (req,res,next) => {
       email: req.body.email,
       strikes: req.body.strikes
   });
-  user.addUser(newUser,(err, user) => {
-      if(err) {
+  user.getUserByEmail(req.body.email, (err, found_user) => {
+    if(err){
+      res.json({success:false, message: `Failed to get user. Error: ${err}`});
+    }
+    else if(found_user){
+      res.write(JSON.stringify({success: true, user:found_user, message:'User already in database'},null,2));
+      res.end();
+    }else{
+      user.addUser(newUser,(err, user) => {
+        if(err) {
           res.json({success: false, message: `Failed to create a new user. Error: ${err}`});
-
-      }
-      else{
-        res.json({success:true, user:user, message: "Added successfully."});f
-      }
-  });
+  
+        }
+        else{
+          res.json({success:true, user:user, message: "Added successfully."});
+        }
+    });
+    }
+  })
 });
 
 //Delete user

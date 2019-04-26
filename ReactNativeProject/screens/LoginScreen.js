@@ -18,11 +18,6 @@ export default class LoginScreen extends React.Component {
   static navigationOptions = {
     title: 'Please sign in',
   };
-    // constructor(props) {
-    //     super(props);
-    //     this.state = { email: '' };
-    //     this.handleEmailChange = this.handleEmailChange.bind(this);
-    //     }
 
   static navigationOptions = {
     title: 'Login',
@@ -43,6 +38,7 @@ export default class LoginScreen extends React.Component {
         /* `accessToken` is now valid and can be used to get data from the Google API with HTTP requests */
         this.props.navigation.navigate('App');
         await AsyncStorage.setItem('userToken', accessToken);
+        this.saveUser(user);
         return accessToken;
       } else{
         return {cancelled: true};
@@ -52,83 +48,39 @@ export default class LoginScreen extends React.Component {
   }
 }
 
+saveUser = async (user) => {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/users/', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        first_name: user.givenName,
+        last_name: user.familyName,
+        email: user.email,
+        strikes: 0
+      })
+    });
+    const responseJson = await response.json();
+    console.log(responseJson);
+    await AsyncStorage.setItem('email', responseJson.user.email);
+    await AsyncStorage.setItem('first_name', responseJson.user.first_name);
+    await AsyncStorage.setItem('user_id', responseJson.user._id);
+
+    return responseJson;
+  }
+  catch (error) {
+    console.error(error);
+  }
+};
+
+
   
 
 
 
 }
   
-
-  // handleEmailChange(email) {
-  //   this.setState({ email: email });
-  // }
-
-
-  // render() {
-  //   const {navigate} = this.props.navigation;
-  //   return (
-  //       <ScrollView>
-  //           <View style={styles.inputContainer}>
-  //               <TextInput
-  //               style={styles.textInput}
-  //               placeholder="Your email"
-  //               maxLength={20}
-  //               onBlur={Keyboard.dismiss}
-  //               value={this.state.email}
-  //               onChangeText={this.handleEmailChange}
-  //               />
-  //               <TouchableOpacity style={styles.saveButton} onPress={() => navigate('Home')}>
-  //                   <Text style={styles.saveButtonText}>Sign in!</Text>
-  //               </TouchableOpacity>
-  //           </View>
-  //       </ScrollView>
-        // <View style={styles.container}>
-        //     <Form 
-        //         type={User}
-        //         options={options}
-        //         ref={c => this._form = c} 
-        //     />
-            
-        // </View>
-//     );
-//   }
-// }
-
-// const styles = StyleSheet.create({
-//     container: {
-//       flex: 1,
-//       paddingTop: 45,
-//       backgroundColor: '#F5FCFF',
-//     },
-//     header: {
-//       fontSize: 25,
-//       textAlign: 'center',
-//       margin: 10,
-//       fontWeight: 'bold'
-//     },
-//     inputContainer: {
-//         paddingTop: 15
-//     },
-//     textInput: {
-//         borderColor: '#CCCCCC',
-//         borderTopWidth: 1,
-//         borderBottomWidth: 1,
-//         height: 50,
-//         fontSize: 25,
-//         paddingLeft: 20,
-//         paddingRight: 20
-//     },
-//     saveButton: {
-//         borderWidth: 1,
-//         borderColor: '#007BFF',
-//         backgroundColor: '#007BFF',
-//         padding: 15,
-//         margin: 5
-//       },
-//       saveButtonText: {
-//         color: '#FFFFFF',
-//         fontSize: 20,
-//         textAlign: 'center'
-//       }
-//   });
 
