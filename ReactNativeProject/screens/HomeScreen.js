@@ -73,11 +73,13 @@ export default class HomeScreen extends React.Component {
             longitudeDelta: 0.011,
           }}
         >
-        {this.state.markers.map(marker => (
+        {this.state.markers.map((marker, index) => (
         <MapView.Marker
+        key = {index}
         coordinate={marker.coordinates}
         title={marker.title}
         pinColor = {'purple'}
+        identifier = {marker.id}
         onSelect={e => console.log(e.nativeEvent)}
         >
         <Image source={require('./bike.png')} style={{height: 35, width:35, }} />
