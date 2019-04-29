@@ -11,6 +11,7 @@ import {
   TouchableHighlight
 } from 'react-native';
 import { WebBrowser, MapView } from 'expo';
+import {Marker} from 'react-native-maps'
 
 import { MonoText } from '../components/StyledText';
 
@@ -20,24 +21,70 @@ export default class HomeScreen extends React.Component {
   };
   state = {
     modalVisible: false,
+    markers: [{
+    title: 'Bike 1',
+    coordinates: {
+      latitude: 44.009690,
+      longitude: -73.177175
+    },
+    id: '1'
+  },
+  {
+    title: 'Bike 2',
+    coordinates: {
+      latitude: 44.01,
+      longitude: -73.178
+    },
+    id: '2'
+  }]
   };
   setModalVisible(visible) {
     this.setState({modalVisible: visible});
   }
 
+  setBikeLocations(){
+    //set the bike pin to the new user location
+    //this.setState({location: bikeLoc})
+  }
+  // getInitialState() {
+  //   return {
+  //     region: {
+  //       latitude: 44.009690,
+  //       longitude: -73.177175,
+  //       latitudeDelta: 0.0052,
+  //       longitudeDelta: 0.011,
+  //     },
+  //   };
+  // }
+
+  // onRegionChange(region) {
+  //   this.setState({ region });
+  // }
 
   render() {
     return (
       <View style={styles.container}>
         <MapView
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: 44.009690,
-            longitude: -73.177175,
-            latitudeDelta: 0.0052,
-            longitudeDelta: 0.011,
-          }}
-        />
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: 44.009690,
+            longitude: -73.177175,
+            latitudeDelta: 0.0052,
+            longitudeDelta: 0.011,
+          }}
+        >
+        {this.state.markers.map(marker => (
+        <MapView.Marker
+        coordinate={marker.coordinates}
+        title={marker.title}
+        pinColor = {'purple'}
+        onSelect={e => console.log(e.nativeEvent)}
+        >
+        <Image source={require('./bike.png')} style={{height: 35, width:35, }} />
+        </MapView.Marker>
+        ))}
+    </MapView>
+
       <View style={{marginTop: 22}}>
         <Modal
           animationType="slide"
