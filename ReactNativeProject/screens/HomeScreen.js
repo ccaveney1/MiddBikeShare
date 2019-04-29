@@ -12,9 +12,12 @@ import {
   AsyncStorage,
   Button,
   Alert,
-  RefreshControl
+  RefreshControl,
+  KeyboardAvoidingView,
 } from 'react-native';
-import { WebBrowser, MapView, Google, Permissions, Location } from 'expo';
+import { WebBrowser, MapView, Google, Location } from 'expo';
+import { Permissions } from 'expo';
+import CodeInput from 'react-native-code-input';
 
 import { MonoText } from '../components/StyledText';
 
@@ -31,45 +34,67 @@ export default class HomeScreen extends React.Component {
   };
   state = {
     location: null,
-    name: null,
+    name: null, //user's first name; retrieved from google sign-in/async storage
     modalVisible: false,
-    bikeSelected: null,
-    bikesAvailable: null,
-    errorMessage: null,
+    bikeSelected: null, //bike object
+    bikesAvailable: null, //array of bike objects
+    errorMessage: null, //error message for location permissions
     refreshing: false,
+    userId: null, //unique userId in database
   };
 
+  // set first name, user id, and available bikes in state as soon as component mounts
   componentDidMount() {
       AsyncStorage.getItem('first_name', (err, first_name) => {
         if(err){console.log(err)}
         else{this.setState({ name: first_name })};
+      });
+      AsyncStorage.getItem('user_id', (err, user_id) => {
+        if(err){console.log(err)}
+        else{this.setState({ userId: user_id })};
       })
+      this.getBikesAvailable(bikes => {
+        this.setState({bikesAvailable: bikes})});
   }
 
+  // not implemented yet... goal is to refresh map with available bikes
   _onRefresh = () => {
     this.setState({refreshing: true});
-    this.getBikesAvailable().then(() => {
+    this.getBikesAvailable(bikes => {this.setState({bikesAvailable: bikes})})
+      .then(() => {
       this.setState({refreshing: false});
     });
   }
 
+  // modal with options to rent or report bike
   setModalVisible = (visible) => {
     this.setState({modalVisible: visible});
   }
 
+  // when begin ride button is pressed
   onNavigateRide = () => {
     this.setModalVisible(!this.state.modalVisible);
-    this.navigate('Ride', {location: this.state.location, bikeId: this.state.bikeSelected});
+    this.beginRide();
+    this.navigate('Ride', {bike: this.state.bikeSelected});
   };
 
+  // bike code
+  _alert = message => Alert.alert(
+    'Confirmation Code',
+    message,
+    [{text: 'OK'}],
+    {cancelable: false}
+  )
+
+  // bike code entered
+  _onFulfill = (code) => {
+    const isValid = code === '1234'
+    if(!isValid) this.refs.codeInputRef.clear()
+    this._alert(isValid ? 'Successful!' : 'Code mismatch!')
+  }
+
+  // send rental instance to database (start ride)
   beginRide = () => {
-
-  };
-  reportMissing = () => {
-
-  };
-  
-  reportDamaged = () => {
     fetch('http://127.0.0.1:3000/rentals/', {
       method: 'POST',
       headers: {
@@ -77,16 +102,64 @@ export default class HomeScreen extends React.Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        user: '5c87f94fc20223c1282fd8e1',
-        bike: '5ca274f279fcd42b80b375da',
-        startLocation: 'One Fine Place to find a bike',
-        reportDamaged: true,
+        user: this.state.userId,
+        bike: this.state.bikeSelected._id,
+        startLocation: this.state.location,
+        reportDamaged: false,
         reportMissing: false
       }),
     });
   };
 
-  getBikesAvailable = () => {
+  // send rental instance to database (missing)
+  reportMissing = () => {
+    return fetch('http://127.0.0.1:3000/rentals/', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: this.state.userId,
+        bike: this.state.bikeSelected._id,
+        startLocation: this.state.location,
+        reportDamaged: false,
+        reportMissing: true
+      }),
+    });
+  };
+
+  // send rental instance to database (damaged)
+  reportDamaged = async () => {
+    console.log('reporting damaged');
+    console.log(this.state.bikeSelected._id);
+    console.log(this.state.userId);
+    console.log(this.state.location);
+    try{
+      let response = await fetch('http://127.0.0.1:3000/rentals/', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/x-www-form-urlencoded',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: JSON.stringify({
+          user: this.state.userId,
+          bike: this.state.bikeSelected._id,
+          startLocation: this.state.location,
+          reportDamaged: true,
+          reportMissing: false
+        })
+      });
+      if (response.status >= 200 && response.status < 300) {
+        console.log("authenticated successfully!!!");
+     }
+    } catch (errors) {
+      alert(errors);
+     }
+  };
+
+  // get array of available bike objects from database
+  getBikesAvailable = (cb) => {
     return fetch('http://127.0.0.1:3000/bikes/')
       .then((response) => response.json())
       .then((responseJson) => {
@@ -97,14 +170,28 @@ export default class HomeScreen extends React.Component {
             availableBikes.push(bikes[i]);
           }
         }
-        console.log(availableBikes);
-        return availableBikes;
+        cb(availableBikes);
       })
       .catch((error) => {
         console.error(error);
       });
   };
 
+  // set bikeSelected to bike object by bikeId (could change to select by bikeLabel)
+  selectBike = async (bikeId) => {
+    try{
+      let bikeSelected = this.state.bikesAvailable.find(bike => {
+      return bike._id === bikeId;
+    });
+    console.log(bikeSelected);
+    await this.setState({ bikeSelected });
+    await console.log(this.state.bikeSelected);
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  // get current location with permissions
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
@@ -117,10 +204,25 @@ export default class HomeScreen extends React.Component {
     console.log(JSON.stringify(this.state.location));
   };
 
+  //sign out, clear async storage, set name and userId states to null
+  _signOutAsync = async () => {
+    const clientId = '108117962987-96atlk0mjo5re9nasjarq2a7m7gnfbub.apps.googleusercontent.com';
+    try {
+        const token = await AsyncStorage.getItem('userToken');
+        this.setState({name: null, userId: null})
+        this.navigate('Auth');
+        await Google.logOutAsync({ clientId, token });
+        await AsyncStorage.clear();
+    }catch(err) {
+        return {error: true};
+    }
+``}
+
 
   render() {
     return (
       <View style={styles.container}>
+      <KeyboardAvoidingView behavior='padding' style={styles.container}>
       <Text>Welcome {this.state.name}</Text>
       {/* <ScrollView
       refreshControl={
@@ -129,7 +231,7 @@ export default class HomeScreen extends React.Component {
           onRefresh={this._onRefresh}
         />
       }> */}
-        <MapView
+        {/* <MapView
           style={{ flex: 1 }}
           initialRegion={{
             latitude: 44.009690,
@@ -137,9 +239,10 @@ export default class HomeScreen extends React.Component {
             latitudeDelta: 0.0052,
             longitudeDelta: 0.011,
           }}
-        />
+        /> */}
         {/* </ScrollView> */}
         <View style={{marginTop: 22}}>
+        
         
           <Modal
             onNavigateRide={this.onNavigateRide}
@@ -156,11 +259,13 @@ export default class HomeScreen extends React.Component {
                               <Text style={styles.saveButtonText}>Begin Rental</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
-                          'Bike Number ' + this.state.bikeSelected,
+                          'Bike Number ' + this.state.bikeSelected.label,
                           'Are you sure you would like to report this bike as Missing?',
                           [
-                              {text: 'Yes', onPress: () => this.setModalVisible(!this.state.modalVisible)},
-                              {
+                              {text: 'Yes', onPress: () => {
+                                this.setModalVisible(!this.state.modalVisible),
+                                this.reportMissing()
+                              }},                              {
                               text: 'Cancel',
                               onPress: () => console.log('Cancel Pressed'),
                               style: 'cancel',
@@ -171,7 +276,7 @@ export default class HomeScreen extends React.Component {
                               <Text style={styles.saveButtonText}>Report Missing</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
-                          'Bike Number ' + this.state.bikeSelected,
+                          'Bike Number ' + this.state.bikeSelected.label,
                           'Are you sure you would like to report this bike as Damaged?',
                           [
                               {text: 'Yes', onPress: () => {
@@ -203,40 +308,39 @@ export default class HomeScreen extends React.Component {
           <TouchableOpacity style={styles.saveButton} onPress={() => {
               this.setModalVisible(true);
               this._getLocationAsync();
-              this.setState({bikeSelected: 123});
+              //could select bike by bikeId or bikeLabel potentially
+              this.selectBike("5cc640ebb6afabc1a0637e4b");
             }}>
                 <Text style={styles.saveButtonText}>Bike</Text>
           </TouchableOpacity>
           
-          <TouchableOpacity style={styles.saveButton} onPress={this.getBikesAvailable}>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {this.getBikesAvailable(bikes =>{
+            console.log(bikes);
+          })}}>
                 <Text style={styles.saveButtonText}>GetBikes</Text>
           </TouchableOpacity>
+
+          
+          <View style={[styles.inputWrapper, {backgroundColor: '#2F0B3A'}]}>
+            <CodeInput
+                ref='codeInputRef'
+                codeLength={4}
+                borderType='circle'
+                autoFocus={false}
+                codeInputStyle={{ fontWeight: '800' }}
+                onFulfill={this._onFulfill}
+              /> 
+          </View>
+          
+
         </View>
+        </KeyboardAvoidingView>
 
       </View>
     );
   }
 
 
-
-  _signOutAsync = async () => {
-    const clientId = '108117962987-96atlk0mjo5re9nasjarq2a7m7gnfbub.apps.googleusercontent.com';
-    try {
-        const token = await AsyncStorage.getItem('userToken');
-        this.navigate('Auth');
-        await Google.logOutAsync({ clientId, token });
-        await AsyncStorage.clear();
-  }catch(err) {
-    return {error: true};
-  }
-}
-
-
-
-
-  startRide = () => {
-    this.navigate('Ride');
-  };
 }
 
 const styles = StyleSheet.create({
@@ -325,6 +429,10 @@ const styles = StyleSheet.create({
   helpLinkText: {
     fontSize: 14,
     color: '#2e78b7',
+  },
+  inputWrapper: {
+    paddingVertical: 50,
+    paddingHorizontal: 20,
   },
   saveButton: {
       borderWidth: 1,

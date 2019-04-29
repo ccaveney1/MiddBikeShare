@@ -13,6 +13,7 @@ var BikeSchema = new Schema({
                         },
   currentLocation     : { type: String },
   currentUser         : { type: Schema.Types.ObjectId, ref: 'User' },
+  label               : { type: Number}
 });
 
 

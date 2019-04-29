@@ -36,7 +36,8 @@ router.post('/', (req,res,next) => {
   let newBike = new bike({
       status: req.body.status,
       currentLocation: req.body.currentLocation,
-      currentUser: null
+      currentUser: null,
+      label: req.body.label,
   });
   bike.addBike(newBike,(err, bike) => {
       if(err) {
