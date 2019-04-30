@@ -35,7 +35,8 @@ router.get('/:id',(req,res,next) => {
 router.post('/', (req,res,next) => {
   let newBike = new bike({
       status: req.body.status,
-      currentLocation: req.body.currentLocation,
+      currentLatitude: req.body.currentLatitude,
+      currentLongitude: req.body.currentLongitude,
       currentUser: null,
       label: req.body.label,
   });
@@ -59,7 +60,7 @@ router.post('/:id', (req,res,next) => {
     let bikeId = req.params.id;
 
     //if currentLocation not specified in body
-    if(!req.body.currentLocation){
+    if(!req.body.currentLongitude){
         //if neither currentUser nor location not specified in body
         if(!req.body.currentUser){
             //update is for status
@@ -76,7 +77,8 @@ router.post('/:id', (req,res,next) => {
         //else update is for currentLocation
     } else {
         updatedBike = {
-            currentLocation: req.body.currentLocation,
+            currentLongitude: req.body.currentLongitude,
+            currentLatitude: req.body.currentLatitude,
         };
     }
     bike.update(bikeId, updatedBike,(err, bike) => {

@@ -11,8 +11,18 @@ var Schema = mongoose.Schema;
 var RentalInstanceSchema = new Schema({
     user              : { type: Schema.Types.ObjectId, ref: 'User' },
     bike              : { type: Schema.Types.ObjectId, ref: 'Bike' },
-    startLocation     : { type: String },
-    endLocation       : { type: String },
+    startLatitude     : {type: Number},
+    startLongitude    : {type: Number},
+    endLatitude       : {type: Number},
+    endLongitude      : {type: Number},
+    // startLocation     : { 
+    //                     lat: { type: Number },
+    //                     long: { type: Number }
+    //                     },
+    // endLocation       : { 
+    //                     lat: { type: Number },
+    //                     long: { type: Number }
+    //                     },
     startTime         : { type: Date },
     endTime           : { type: Date },
     reportDamaged     : { type: Boolean },

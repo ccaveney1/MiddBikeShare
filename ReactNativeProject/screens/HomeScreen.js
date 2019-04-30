@@ -17,8 +17,7 @@ import {
 } from 'react-native';
 import { WebBrowser, MapView, Google, Location } from 'expo';
 import { Permissions } from 'expo';
-import CodeInput from 'react-native-code-input';
-
+import {Marker} from 'react-native-maps'
 import { MonoText } from '../components/StyledText';
 
 export default class HomeScreen extends React.Component {
@@ -41,6 +40,24 @@ export default class HomeScreen extends React.Component {
     errorMessage: null, //error message for location permissions
     refreshing: false,
     userId: null, //unique userId in database
+    latitude: null,
+    longitude: null,
+    markers: [{
+          title: 'Bike 1',
+          coordinates: {
+            latitude: 44.009690,
+            longitude: -73.177175
+          },
+          id: '1'
+        },
+        {
+          title: 'Bike 2',
+          coordinates: {
+            latitude: 44.01,
+            longitude: -73.178
+          },
+          id: '2'
+        }]
   };
 
   // set first name, user id, and available bikes in state as soon as component mounts
@@ -74,27 +91,14 @@ export default class HomeScreen extends React.Component {
   // when begin ride button is pressed
   onNavigateRide = () => {
     this.setModalVisible(!this.state.modalVisible);
-    this.beginRide();
-    this.navigate('Ride', {bike: this.state.bikeSelected});
+    this.beginRide(rentalId => {
+      this.navigate('Ride', {bike: this.state.bikeSelected, rentalId: rentalId});
+    });    
   };
 
-  // bike code
-  _alert = message => Alert.alert(
-    'Confirmation Code',
-    message,
-    [{text: 'OK'}],
-    {cancelable: false}
-  )
-
-  // bike code entered
-  _onFulfill = (code) => {
-    const isValid = code === '1234'
-    if(!isValid) this.refs.codeInputRef.clear()
-    this._alert(isValid ? 'Successful!' : 'Code mismatch!')
-  }
 
   // send rental instance to database (start ride)
-  beginRide = () => {
+  beginRide = (cb) => {
     fetch('http://127.0.0.1:3000/rentals/', {
       method: 'POST',
       headers: {
@@ -104,10 +108,17 @@ export default class HomeScreen extends React.Component {
       body: JSON.stringify({
         user: this.state.userId,
         bike: this.state.bikeSelected._id,
-        startLocation: this.state.location,
+        startLatitude: this.state.latitude,
+        startLongitude: this.state.longitude,
         reportDamaged: false,
         reportMissing: false
-      }),
+      })
+    }).then((response) => response.json())
+    .then((responseJson) => {
+      cb(responseJson.rental._id);
+    })
+    .catch((error) => {
+      console.error(error);
     });
   };
 
@@ -122,40 +133,45 @@ export default class HomeScreen extends React.Component {
       body: JSON.stringify({
         user: this.state.userId,
         bike: this.state.bikeSelected._id,
-        startLocation: this.state.location,
+        startLatitude: this.state.latitude,
+        startLongitude: this.state.longitude,
         reportDamaged: false,
         reportMissing: true
       }),
+    }).then((response) => response.json())
+    .then((responseJson) => {
+      return responseJson.rental._id;
+    })
+    .catch((error) => {
+      console.error(error);
     });
+
   };
 
   // send rental instance to database (damaged)
-  reportDamaged = async () => {
-    console.log('reporting damaged');
-    console.log(this.state.bikeSelected._id);
-    console.log(this.state.userId);
-    console.log(this.state.location);
-    try{
-      let response = await fetch('http://127.0.0.1:3000/rentals/', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/x-www-form-urlencoded',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: JSON.stringify({
-          user: this.state.userId,
-          bike: this.state.bikeSelected._id,
-          startLocation: this.state.location,
-          reportDamaged: true,
-          reportMissing: false
-        })
-      });
-      if (response.status >= 200 && response.status < 300) {
-        console.log("authenticated successfully!!!");
-     }
-    } catch (errors) {
-      alert(errors);
-     }
+  reportDamaged = () => {
+    return fetch('http://127.0.0.1:3000/rentals/', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user: this.state.userId,
+        bike: this.state.bikeSelected._id,
+        startLatitude: this.state.latitude,
+        startLongitude: this.state.longitude,
+        reportDamaged: true,
+        reportMissing: false
+      }),
+    }).then((response) => response.json())
+    .then((responseJson) => {
+      return responseJson;
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+
   };
 
   // get array of available bike objects from database
@@ -183,9 +199,7 @@ export default class HomeScreen extends React.Component {
       let bikeSelected = this.state.bikesAvailable.find(bike => {
       return bike._id === bikeId;
     });
-    console.log(bikeSelected);
     await this.setState({ bikeSelected });
-    await console.log(this.state.bikeSelected);
     }catch(err){
       console.log(err);
     }
@@ -200,8 +214,7 @@ export default class HomeScreen extends React.Component {
       });
     }
     let location = await Location.getCurrentPositionAsync({});
-    this.setState({ location });
-    console.log(JSON.stringify(this.state.location));
+    this.setState({latitude: location.coords.latitude, longitude: location.coords.longitude});
   };
 
   //sign out, clear async storage, set name and userId states to null
@@ -222,26 +235,24 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-      <KeyboardAvoidingView behavior='padding' style={styles.container}>
-      <Text>Welcome {this.state.name}</Text>
-      {/* <ScrollView
-      refreshControl={
-        <RefreshControl
-          refreshing={this.state.refreshing}
-          onRefresh={this._onRefresh}
-        />
-      }> */}
-        {/* <MapView
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: 44.009690,
-            longitude: -73.177175,
-            latitudeDelta: 0.0052,
-            longitudeDelta: 0.011,
-          }}
-        /> */}
-        {/* </ScrollView> */}
-        <View style={{marginTop: 22}}>
+
+        <MapView
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: 44.009690,
+            longitude: -73.177175,
+            latitudeDelta: 0.0052,
+            longitudeDelta: 0.011,
+          }}>{this.state.markers.map((marker, index) => (
+            <MapView.Marker
+            coordinate={marker.coordinates}
+            key={index}
+            title={marker.title}
+            pinColor = {'purple'}
+            identifier = {marker.id}
+            onSelect={e => console.log(e.nativeEvent)}
+            ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
+          ))}</MapView>
         
         
           <Modal
@@ -308,33 +319,18 @@ export default class HomeScreen extends React.Component {
           <TouchableOpacity style={styles.saveButton} onPress={() => {
               this.setModalVisible(true);
               this._getLocationAsync();
-              //could select bike by bikeId or bikeLabel potentially
-              this.selectBike("5cc640ebb6afabc1a0637e4b");
+              this.selectBike("5cc76f7f2a9171f49a6212be");
             }}>
                 <Text style={styles.saveButtonText}>Bike</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.saveButton} onPress={() => {this.getBikesAvailable(bikes =>{
-            console.log(bikes);
+            console.log(bikes);``
           })}}>
                 <Text style={styles.saveButtonText}>GetBikes</Text>
           </TouchableOpacity>
-
-          
-          <View style={[styles.inputWrapper, {backgroundColor: '#2F0B3A'}]}>
-            <CodeInput
-                ref='codeInputRef'
-                codeLength={4}
-                borderType='circle'
-                autoFocus={false}
-                codeInputStyle={{ fontWeight: '800' }}
-                onFulfill={this._onFulfill}
-              /> 
-          </View>
           
 
-        </View>
-        </KeyboardAvoidingView>
 
       </View>
     );

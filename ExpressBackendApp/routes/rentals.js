@@ -41,8 +41,10 @@ router.post('/', (req,res,next) => {
     let newRental = new rental({
         user: req.body.user,
         bike: req.body.bike,
-        startLocation: req.body.startLocation,
-        endLocation: null,
+        startLatitude: req.body.startLatitude,
+        startLongitude: req.body.startLongitude,
+        endLatitude: null,
+        endLongitude: null,
         startTime: Date.now(),
         endTime: null,
         reportDamaged: req.body.reportDamaged,
@@ -94,7 +96,8 @@ router.post('/', (req,res,next) => {
 router.post('/:id', (req,res,next) => {
     let rentalId = req.params.id;
     let updatedRental = {
-        endLocation: req.body.endLocation,
+        endLatitude: req.body.endLatitude,
+        endLongitude: req.body.endLongitude,
         endTime: Date.now(),
         reportDamaged: req.body.reportDamaged,
     };
@@ -102,12 +105,14 @@ router.post('/:id', (req,res,next) => {
     let updatedBike;
     if(req.body.reportDamaged){
         updatedBike = {
-            currentLocation:req.body.endLocation,
+            currentLongitude: req.body.endLongitude,
+            currentLatitude:req.body.endLatitude,
             status: 'Damaged'
         };
     }else{
         updatedBike = {
-            currentLocation:req.body.endLocation,
+            currentLongitude: req.body.endLongitude,
+            currentLatitude:req.body.endLatitude,
             status: 'Available'
         };
     }

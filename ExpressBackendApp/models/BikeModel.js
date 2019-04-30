@@ -11,7 +11,12 @@ var BikeSchema = new Schema({
                         type: String,
                         enum: ['Available', 'Damaged', 'Missing', 'Rented'],
                         },
-  currentLocation     : { type: String },
+  // currentLocation     : { 
+  //                       lat: { type: Number },
+  //                       long: { type: Number }
+  //                       },
+  currentLatitude     : {type: Number},
+  currentLongitude    : {type: Number},
   currentUser         : { type: Schema.Types.ObjectId, ref: 'User' },
   label               : { type: Number}
 });

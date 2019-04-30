@@ -26,43 +26,54 @@ export default class RideScreen extends React.Component {
   constructor(props) {
     super(props);
     this.navigate = this.props.navigation.navigate;
-    this.bike = this.props.bike;
-    this.userId = this.props.userId;
+    this.bike = this.props.navigation.getParam('bike');
+    this.rentalId = this.props.navigation.getParam('rentalId');
   }
   state = {
-    location: null,
+    latitude: null,
+    longitude: null,
+    bike: null,
   };
 
   endRide = () => {
-    let url = 'http://127.0.0.1:3000/rentals/'.concat(this.bike._id);
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        endLocation: this.state.location,
-        reportDamaged: false,
-      })
-    });
+    this._getLocationAsync().then(() => {
+      let url = 'http://127.0.0.1:3000/rentals/'.concat(this.rentalId);
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          endLongitude: this.state.longitude,
+          endLatitude: this.state.latitude,
+          reportDamaged: false,
+          bike: this.bike._id
+        })
+      });
+    }); 
   };
 
   reportDamaged = () => {
-    let url = 'http://127.0.0.1:3000/rentals/'.concat(this.bike._id);
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        endLocation: this.state.location,
-        reportDamaged: true,
-      })
-    });
+    this._getLocationAsync().then(() => {
+      let url = 'http://127.0.0.1:3000/rentals/'.concat(this.rentalId);
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          endLongitude: this.state.longitude,
+          endLatitude: this.state.latitude,
+          reportDamaged: true,
+          bike: this.bike._id
+        })
+      });
+    }); 
   };
 
+  // get current location with permissions
   _getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== 'granted') {
@@ -71,20 +82,21 @@ export default class RideScreen extends React.Component {
       });
     }
     let location = await Location.getCurrentPositionAsync({});
-    this.setState({ location });
-    console.log(JSON.stringify(this.state.location));
+    this.setState({latitude: location.coords.latitude, longitude: location.coords.longitude});
+    return location;
   };
 
 
   render() {
+
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
+        <TouchableOpacity style={styles.saveButton} onPress={()=>{
+          Alert.alert(
                 'Bike Number ' + this.bike.label,
                 'Are you sure you would like to end your Ride?',
                 [
                     {text: 'Yes', onPress: () => {
-                      this._getLocationAsync();
                       this.endRide();
                       this.navigate('Home');
                     }},
@@ -95,8 +107,8 @@ export default class RideScreen extends React.Component {
                     }
                 ],
                 {cancelable: false},
-        )}>
-                    <Text style={styles.saveButtonText}>Report Damaged</Text>
+        )}}>
+                    <Text style={styles.saveButtonText}>Park your bike!</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
                 'Bike Number ' + this.bike.label,
