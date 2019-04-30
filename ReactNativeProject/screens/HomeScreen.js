@@ -251,6 +251,9 @@ export default class HomeScreen extends React.Component {
             pinColor = {'purple'}
             identifier = {marker.id}
             onSelect={e => console.log(e.nativeEvent)}
+            onPress={() => {
+              this.setModalVisible(!this.state.modalVisible);
+              }}
             ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
           ))}</MapView>
         
@@ -432,8 +435,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
       borderWidth: 1,
-      borderColor: '#007BFF',
-      backgroundColor: '#007BFF',
+      borderColor: 'purple',
+      backgroundColor: 'purple',
       padding: 15,
       margin: 5
     },
