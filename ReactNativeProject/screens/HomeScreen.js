@@ -23,6 +23,7 @@ export default class HomeScreen extends React.Component {
     modalVisible: false,
     markers: [{
     title: 'Bike 1',
+    description: 'balkfjb',
     coordinates: {
       latitude: 44.009690,
       longitude: -73.177175
@@ -31,6 +32,7 @@ export default class HomeScreen extends React.Component {
   },
   {
     title: 'Bike 2',
+    description: 'asdjas;ldkjf',
     coordinates: {
       latitude: 44.01,
       longitude: -73.178
@@ -45,6 +47,12 @@ export default class HomeScreen extends React.Component {
   setBikeLocations(){
     //set the bike pin to the new user location
     //this.setState({location: bikeLoc})
+  }
+
+  markerPressed(){
+    console.log("MarkerPressed");
+    this.setModalVisible(!this.state.modalVisible);
+
   }
   // getInitialState() {
   //   return {
@@ -81,6 +89,10 @@ export default class HomeScreen extends React.Component {
         pinColor = {'purple'}
         identifier = {marker.id}
         onSelect={e => console.log(e.nativeEvent)}
+        //onPress={this.markerPressed}
+        onPress={() => {
+            this.setModalVisible(!this.state.modalVisible);
+            }}
         >
         <Image source={require('./bike.png')} style={{height: 35, width:35, }} />
         </MapView.Marker>
@@ -89,7 +101,7 @@ export default class HomeScreen extends React.Component {
 
       <View style={{marginTop: 22}}>
         <Modal
-          animationType="slide"
+          animationType="fade"
           transparent={false}
           visible={this.state.modalVisible}
           onRequestClose={() => {
@@ -120,11 +132,6 @@ export default class HomeScreen extends React.Component {
             </View>
           </View>
         </Modal>
-        <TouchableOpacity style={styles.saveButton} onPress={() => {
-            this.setModalVisible(true);
-          }}>
-              <Text style={styles.saveButtonText}>Bike</Text>
-          </TouchableOpacity>
       </View>
         {/* <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <View style={styles.welcomeContainer}></View>
@@ -305,8 +312,8 @@ const styles = StyleSheet.create({
   },
   saveButton: {
       borderWidth: 1,
-      borderColor: '#007BFF',
-      backgroundColor: '#007BFF',
+      borderColor: 'purple',
+      backgroundColor: 'purple',
       padding: 15,
       margin: 5
     },
