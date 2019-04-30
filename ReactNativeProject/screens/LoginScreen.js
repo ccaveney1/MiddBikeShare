@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, 
-  Text, 
-  ScrollView, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
+import { View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  Image,
+  TextInput,
+  TouchableOpacity,
   Keyboard,
   AsyncStorage,
   Button } from 'react-native';
@@ -25,8 +26,16 @@ export default class LoginScreen extends React.Component {
 
   render() {
     return (
-      <View>
-        <Button title="Sign in!" onPress={this._signInAsync} />
+      <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
+        <Image source={require('./bike.png')} />
+        <Text style={{color: 'black', fontSize: 24, fontFamily: 'GillSans-Bold', lineHeight: 50}}>
+        Middlebury Bikeshare
+        </Text>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={this._signInAsync}>
+            <Text style={styles.saveButtonText}>Sign In!</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -42,7 +51,7 @@ export default class LoginScreen extends React.Component {
         return accessToken;
       } else{
         return {cancelled: true};
-      } 
+      }
   }catch(err) {
     return {error: true};
   }
@@ -77,10 +86,22 @@ saveUser = async (user) => {
 };
 
 
-  
+
 
 
 
 }
-  
-
+const styles = StyleSheet.create({
+  saveButton: {
+      borderWidth: 1,
+      borderColor: 'purple',
+      backgroundColor: 'purple',
+      padding: 15,
+      margin: 5
+    },
+    saveButtonText: {
+      color: '#FFFFFF',
+      fontSize: 20,
+      textAlign: 'center'
+    }
+  })

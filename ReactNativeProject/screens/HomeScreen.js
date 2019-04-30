@@ -93,7 +93,7 @@ export default class HomeScreen extends React.Component {
     this.setModalVisible(!this.state.modalVisible);
     this.beginRide(rentalId => {
       this.navigate('Ride', {bike: this.state.bikeSelected, rentalId: rentalId});
-    });    
+    });
   };
 
 
@@ -253,11 +253,13 @@ export default class HomeScreen extends React.Component {
             onSelect={e => console.log(e.nativeEvent)}
             onPress={() => {
               this.setModalVisible(!this.state.modalVisible);
+              this._getLocationAsync();
+              this.selectBike("5cc76f7f2a9171f49a6212be");
               }}
             ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
           ))}</MapView>
-        
-        
+
+
           <Modal
             onNavigateRide={this.onNavigateRide}
             animationType="slide"
@@ -266,9 +268,9 @@ export default class HomeScreen extends React.Component {
             onRequestClose={() => {
               Alert.alert('Modal has been closed.');
             }}>
-            <View style={{marginTop: 22}}>
-                <TouchableOpacity 
-                    style={styles.saveButton} 
+            <View style={{marginTop: 200}}>
+                <TouchableOpacity
+                    style={styles.saveButton}
                     onPress={() => {this.onNavigateRide()}}>
                               <Text style={styles.saveButtonText}>Begin Rental</Text>
                 </TouchableOpacity>
@@ -318,23 +320,11 @@ export default class HomeScreen extends React.Component {
           <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
                 <Text style={styles.saveButtonText}>Sign Out</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.saveButton} onPress={() => {
-              this.setModalVisible(true);
-              this._getLocationAsync();
-              this.selectBike("5cc76f7f2a9171f49a6212be");
-            }}>
-                <Text style={styles.saveButtonText}>Bike</Text>
-          </TouchableOpacity>
-          
           <TouchableOpacity style={styles.saveButton} onPress={() => {this.getBikesAvailable(bikes =>{
             console.log(bikes);``
           })}}>
                 <Text style={styles.saveButtonText}>GetBikes</Text>
           </TouchableOpacity>
-          
-
-
       </View>
     );
   }
@@ -346,6 +336,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+
   },
   developmentModeText: {
     marginBottom: 20,
