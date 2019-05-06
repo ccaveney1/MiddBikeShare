@@ -51,7 +51,12 @@ export default class RideScreen extends React.Component {
           bike: this.bike._id
         })
       });
-    }); 
+    });
+    // this.getBikesAvailable(bikes => {
+    //   this.setBikeLocations(bikes, bikeLocations => {//might need .then
+    //     this.setState({markers: bikeLocations});
+    //   });
+    //   this.setState({bikesAvailable: bikes})});
   };
 
   reportDamaged = () => {
@@ -70,7 +75,7 @@ export default class RideScreen extends React.Component {
           bike: this.bike._id
         })
       });
-    }); 
+    });
   };
 
   // get current location with permissions
@@ -86,6 +91,41 @@ export default class RideScreen extends React.Component {
     return location;
   };
 
+  //Sets up list of bike markers to be placed on the map
+    setBikeLocations = (availableBikes, cb) => {
+      bikeMarkers = []
+      for (var i = 0; i < availableBikes.length; i++){
+        bikeMarkers[i] = {
+          title : 'Bike' + toString(i),
+          coordinates: {
+            latitude: availableBikes[i].currentLatitude,
+            longitude: availableBikes[i].currentLongitude,
+          },
+          id : availableBikes[i]._id
+          }
+        }
+        cb(bikeMarkers);
+      }
+
+  // get array of available bike objects from database
+  getBikesAvailable = (cb) => {
+    return fetch('http://127.0.0.1:3000/bikes/')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let bikes = responseJson.bikes;
+        let availableBikes = [];
+        for (var i = 0; i < bikes.length; i++) {
+          if(bikes[i].status === 'Available'){
+            availableBikes.push(bikes[i]);
+          }
+        }
+        console.log(availableBikes)
+        cb(availableBikes);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   render() {
 

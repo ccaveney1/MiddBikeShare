@@ -42,22 +42,10 @@ export default class HomeScreen extends React.Component {
     userId: null, //unique userId in database
     latitude: null,
     longitude: null,
-    markers: [{
-          title: 'Bike 1',
-          coordinates: {
-            latitude: 44.009690,
-            longitude: -73.177175
-          },
-          id: '1'
-        },
-        {
-          title: 'Bike 2',
-          coordinates: {
-            latitude: 44.01,
-            longitude: -73.178
-          },
-          id: '2'
-        }]
+    markers: [{coordinates: {
+      latitude: 0,
+      longitude:0
+    }}]
   };
 
   // set first name, user id, and available bikes in state as soon as component mounts
@@ -71,17 +59,40 @@ export default class HomeScreen extends React.Component {
         else{this.setState({ userId: user_id })};
       })
       this.getBikesAvailable(bikes => {
+        this.setBikeLocations(bikes, bikeLocations => {//might need .then
+          this.setState({markers: bikeLocations});
+        });
         this.setState({bikesAvailable: bikes})});
   }
 
   // not implemented yet... goal is to refresh map with available bikes
   _onRefresh = () => {
     this.setState({refreshing: true});
-    this.getBikesAvailable(bikes => {this.setState({bikesAvailable: bikes})})
+    this.setBikeLocations(bikes, bikeLocations => {//might need .then
+      this.setState({markers: bikeLocations});
+    })
+      .then(() => {
+    this.getBikesAvailable(bikes => {this.setState({bikesAvailable: bikes})})})
       .then(() => {
       this.setState({refreshing: false});
     });
   }
+
+//Sets up list of bike markers to be placed on the map
+  setBikeLocations = (availableBikes, cb) => {
+    bikeMarkers = []
+    for (var i = 0; i < availableBikes.length; i++){
+      bikeMarkers[i] = {
+        title : 'Bike' + toString(i),
+        coordinates: {
+          latitude: availableBikes[i].currentLatitude,
+          longitude: availableBikes[i].currentLongitude,
+        },
+        id : availableBikes[i]._id
+        }
+      }
+      cb(bikeMarkers);
+    }
 
   // modal with options to rent or report bike
   setModalVisible = (visible) => {
@@ -186,6 +197,7 @@ export default class HomeScreen extends React.Component {
             availableBikes.push(bikes[i]);
           }
         }
+        console.log(availableBikes)
         cb(availableBikes);
       })
       .catch((error) => {
@@ -254,7 +266,7 @@ export default class HomeScreen extends React.Component {
             onPress={() => {
               this.setModalVisible(!this.state.modalVisible);
               this._getLocationAsync();
-              this.selectBike("5cc76f7f2a9171f49a6212be");
+              this.selectBike(marker.id);
               }}
             ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
           ))}</MapView>
@@ -321,6 +333,9 @@ export default class HomeScreen extends React.Component {
                 <Text style={styles.saveButtonText}>Sign Out</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton} onPress={() => {this.getBikesAvailable(bikes =>{
+            this.setBikeLocations(bikes, bikeLocations => {//might need .then
+              this.setState({markers: bikeLocations});
+            });
             console.log(bikes);``
           })}}>
                 <Text style={styles.saveButtonText}>GetBikes</Text>
