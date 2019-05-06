@@ -130,7 +130,9 @@ export default class RideScreen extends React.Component {
   render() {
 
     return (
-      <View style={styles.container}>
+      <View style={styles.modal}>
+        <Text style={{fontSize: 30, color:'purple', textAlign: 'center', paddingTop: 50, paddingBottom:20}}>You're Riding!</Text>
+        <Text style={{fontSize: 20, color:'purple', textAlign: 'center', paddingBottom:20}}>Bike Number {this.bike.label}</Text>
         <TouchableOpacity style={styles.saveButton} onPress={()=>{
           Alert.alert(
                 'Bike Number ' + this.bike.label,
@@ -184,8 +186,8 @@ const styles = StyleSheet.create({
     },
     saveButton: {
         borderWidth: 1,
-        borderColor: '#007BFF',
-        backgroundColor: '#007BFF',
+        borderColor: 'purple',
+        backgroundColor: 'purple',
         padding: 15,
         margin: 5
     },
@@ -193,5 +195,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 20,
     textAlign: 'center'
+    },
+    modal: {
+      flex:1,
+      color: 'white',
+      paddingVertical: 200,
+      paddingHorizontal: 30,
     }
 });

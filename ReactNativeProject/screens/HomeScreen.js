@@ -247,7 +247,8 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-
+      <Text style={{fontSize: 30, color:'purple', textAlign: 'center', paddingTop: 50, paddingBottom:20}}>Welcome {this.state.name}</Text>
+      <Text style={{fontSize: 20, color:'purple', textAlign: 'center', paddingBottom:20}}>Choose a bike to start riding!</Text>
         <MapView
           style={{ flex: 1 }}
           initialRegion={{
@@ -274,13 +275,12 @@ export default class HomeScreen extends React.Component {
 
           <Modal
             onNavigateRide={this.onNavigateRide}
-            animationType="slide"
-            transparent={false}
+            animationType="fade"
+            transparent={true}
             visible={this.state.modalVisible}
-            onRequestClose={() => {
-              Alert.alert('Modal has been closed.');
-            }}>
-            <View style={{marginTop: 200}}>
+            >
+            <View style={styles.modal}>
+            <View style={styles.modalView}>
                 <TouchableOpacity
                     style={styles.saveButton}
                     onPress={() => {this.onNavigateRide()}}>
@@ -327,18 +327,12 @@ export default class HomeScreen extends React.Component {
                     <Text style={styles.saveButtonText}>Cancel</Text>
                 </TouchableOpacity>
             </View>
+            </View>
+
           </Modal>
 
           <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
                 <Text style={styles.saveButtonText}>Sign Out</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={() => {this.getBikesAvailable(bikes =>{
-            this.setBikeLocations(bikes, bikeLocations => {//might need .then
-              this.setState({markers: bikeLocations});
-            });
-            console.log(bikes);``
-          })}}>
-                <Text style={styles.saveButtonText}>GetBikes</Text>
           </TouchableOpacity>
       </View>
     );
@@ -351,6 +345,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    justifyContent: 'center',
 
   },
   developmentModeText: {
@@ -443,12 +438,41 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: 'purple',
       backgroundColor: 'purple',
-      padding: 15,
+      paddingHorizontal: 40,
+      paddingVertical: 15,
       margin: 5
     },
     saveButtonText: {
       color: '#FFFFFF',
       fontSize: 20,
       textAlign: 'center'
+    },
+    modal: {
+      flex:1,
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      // borderColor:'#cccccc',
+      // margin:2,
+      // borderRadius:10,
+      // shadowOffset:{  width: 10,  height: 10,  },
+      // shadowColor: 'black',
+      // shadowOpacity: 1.0,
+      // backgroundColor:'#fff',
+    },
+
+    modalView: {
+      backgroundColor:'#fff',
+      width: 350,
+      height: 300,
+      borderColor:'#cccccc',
+      margin:2,
+      borderRadius:10,
+      shadowOffset:{  width: 10,  height: 10,  },
+      shadowColor: 'black',
+      shadowOpacity: .8,
+      justifyContent: 'center',
+      alignItems: 'center'
     }
+
 });
