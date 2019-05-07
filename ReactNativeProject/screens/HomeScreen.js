@@ -106,7 +106,7 @@ export default class HomeScreen extends React.Component {
 
   // send rental instance to database (start ride)
   beginRide = (cb) => {
-    fetch('http://127.0.0.1:3000/rentals/', {
+    fetch('https://midd-bikeshare-backend.herokuapp.com/rentals/', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -131,7 +131,7 @@ export default class HomeScreen extends React.Component {
 
   // send rental instance to database (missing)
   reportMissing = () => {
-    return fetch('http://127.0.0.1:3000/rentals/', {
+    return fetch('https://midd-bikeshare-backend.herokuapp.com/rentals/', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -157,7 +157,7 @@ export default class HomeScreen extends React.Component {
 
   // send rental instance to database (damaged)
   reportDamaged = () => {
-    return fetch('http://127.0.0.1:3000/rentals/', {
+    return fetch('https://midd-bikeshare-backend.herokuapp.com/rentals/', {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -183,7 +183,7 @@ export default class HomeScreen extends React.Component {
 
   // get array of available bike objects from database
   getBikesAvailable = (cb) => {
-    return fetch('http://127.0.0.1:3000/bikes/')
+    return fetch('https://midd-bikeshare-backend.herokuapp.com/bikes/')
       .then((response) => response.json())
       .then((responseJson) => {
         let bikes = responseJson.bikes;
