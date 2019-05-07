@@ -20,6 +20,7 @@ import { Permissions } from 'expo';
 import {Marker} from 'react-native-maps'
 import { MonoText } from '../components/StyledText';
 
+
 export default class HomeScreen extends React.Component {
 
   constructor(props) {
@@ -86,6 +87,12 @@ export default class HomeScreen extends React.Component {
   // modal with options to rent or report bike
   setModalVisible = (visible) => {
     this.setState({modalVisible: visible});
+  }
+
+  toggleSideMenu = () => {
+    this.setState({
+      sideMenuOpen: !this.state.sideMenuOpen
+    })
   }
 
   // when begin ride button is pressed
@@ -233,7 +240,11 @@ export default class HomeScreen extends React.Component {
 
 
   render() {
+
+
+
     return (
+      
       <View style={styles.container}>
       <Text style={{fontSize: 30, color:'purple', textAlign: 'center', paddingTop: 50, paddingBottom:20}}>Welcome {this.state.name}</Text>
       <Text style={{fontSize: 20, color:'purple', textAlign: 'center', paddingBottom:20}}>Choose a bike to start riding!</Text>
@@ -253,9 +264,10 @@ export default class HomeScreen extends React.Component {
             identifier = {marker.id}
             onSelect={e => console.log(e.nativeEvent)}
             onPress={() => {
-              this.setModalVisible(!this.state.modalVisible);
               this._getLocationAsync();
-              this.selectBike("5cc76f7f2a9171f49a6212be");
+              this.selectBike("5cc76f7f2a9171f49a6212be").then(() => {
+                this.setModalVisible(!this.state.modalVisible);
+              })   
               }}
             ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
           ))}</MapView>
@@ -309,7 +321,7 @@ export default class HomeScreen extends React.Component {
                 )}>
                               <Text style={styles.saveButtonText}>Report Damaged</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.saveButton} onPress={() => {
+                <TouchableOpacity style={styles.cancelButton} onPress={() => {
                     this.setModalVisible(!this.state.modalVisible);
                     }}>
                     <Text style={styles.saveButtonText}>Cancel</Text>
@@ -323,6 +335,7 @@ export default class HomeScreen extends React.Component {
                 <Text style={styles.saveButtonText}>Sign Out</Text>
           </TouchableOpacity>
       </View>
+
     );
   }
 
@@ -399,36 +412,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#fbfbfb',
     paddingVertical: 20,
   },
-  tabBarInfoText: {
-    fontSize: 17,
-    color: 'rgba(96,100,109, 1)',
-    textAlign: 'center',
-  },
-  navigationFilename: {
-    marginTop: 5,
-  },
-  helpContainer: {
-    marginTop: 15,
-    alignItems: 'center',
-  },
-  helpLink: {
-    paddingVertical: 15,
-  },
-  helpLinkText: {
-    fontSize: 14,
-    color: '#2e78b7',
-  },
-  inputWrapper: {
-    paddingVertical: 50,
-    paddingHorizontal: 20,
-  },
   saveButton: {
       borderWidth: 1,
+      borderRadius: 30,
+      borderColor: 'purple',
+      backgroundColor: 'purple',
+      paddingVertical: 15,
+      margin: 5,
+      width: 250,
+    },
+    cancelButton: {
+      borderWidth: 1,
+      borderRadius: 30,
       borderColor: 'purple',
       backgroundColor: 'purple',
       paddingHorizontal: 40,
       paddingVertical: 15,
-      margin: 5
+      margin: 5,
+      width: 150,
     },
     saveButtonText: {
       color: '#FFFFFF',
