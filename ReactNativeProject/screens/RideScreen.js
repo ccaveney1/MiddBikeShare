@@ -33,6 +33,8 @@ export default class RideScreen extends React.Component {
     latitude: null,
     longitude: null,
     bike: null,
+    markers: [],
+    bikesAvailable: null
   };
 
   endRide = () => {
@@ -52,11 +54,12 @@ export default class RideScreen extends React.Component {
         })
       });
     });
-    // this.getBikesAvailable(bikes => {
-    //   this.setBikeLocations(bikes, bikeLocations => {//might need .then
-    //     this.setState({markers: bikeLocations});
-    //   });
-    //   this.setState({bikesAvailable: bikes})});
+    this.getBikesAvailable(bikes => {
+      this.setBikeLocations(bikes, bikeLocations => {//might need .then
+        this.setState({markers: bikeLocations});
+        console.log(this.state.markers);
+      });
+      this.setState({bikesAvailable: bikes})});
   };
 
   reportDamaged = () => {
@@ -119,7 +122,7 @@ export default class RideScreen extends React.Component {
             availableBikes.push(bikes[i]);
           }
         }
-        console.log(availableBikes)
+        //console.log(availableBikes)
         cb(availableBikes);
       })
       .catch((error) => {
@@ -140,7 +143,7 @@ export default class RideScreen extends React.Component {
                 [
                     {text: 'Yes', onPress: () => {
                       this.endRide();
-                      this.navigate('Home');
+                      this.navigate('Home', {markers: this.state.markers});
                     }},
                     {
                     text: 'Cancel',

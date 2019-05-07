@@ -1,4 +1,5 @@
 import React from 'react';
+import {NavigationEvents} from 'react-navigation';
 import {
   Image,
   Platform,
@@ -25,7 +26,9 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.navigate = this.props.navigation.navigate;
+    //this.state.markers = this.props.navigation.state.params.getParam('markers');
   }
+
 
   static navigationOptions = {
     title: 'Welcome to the app!',
@@ -45,7 +48,8 @@ export default class HomeScreen extends React.Component {
     markers: [{coordinates: {
       latitude: 0,
       longitude:0
-    }}]
+    }}],
+    markersLoaded: false
   };
 
   // set first name, user id, and available bikes in state as soon as component mounts
@@ -60,6 +64,7 @@ export default class HomeScreen extends React.Component {
       })
       this.getBikesAvailable(bikes => {
         this.setBikeLocations(bikes, bikeLocations => {//might need .then
+          console.log(this.state.markers)
           this.setState({markers: bikeLocations});
         });
         this.setState({bikesAvailable: bikes})});
@@ -70,6 +75,7 @@ export default class HomeScreen extends React.Component {
     this.setState({refreshing: true});
     this.setBikeLocations(bikes, bikeLocations => {//might need .then
       this.setState({markers: bikeLocations});
+      //console.log(this.state.markers)
     })
       .then(() => {
     this.getBikesAvailable(bikes => {this.setState({bikesAvailable: bikes})})})
@@ -91,6 +97,7 @@ export default class HomeScreen extends React.Component {
         id : availableBikes[i]._id
         }
       }
+      //console.log(bikeMarkers);
       cb(bikeMarkers);
     }
 
@@ -105,6 +112,8 @@ export default class HomeScreen extends React.Component {
     this.beginRide(rentalId => {
       this.navigate('Ride', {bike: this.state.bikeSelected, rentalId: rentalId});
     });
+    console.log('hello')
+    this.setState({markersLoaded: true})
   };
 
 
@@ -185,6 +194,7 @@ export default class HomeScreen extends React.Component {
 
   };
 
+
   // get array of available bike objects from database
   getBikesAvailable = (cb) => {
     return fetch('http://127.0.0.1:3000/bikes/')
@@ -249,6 +259,12 @@ export default class HomeScreen extends React.Component {
       <View style={styles.container}>
       <Text style={{fontSize: 30, color:'purple', textAlign: 'center', paddingTop: 50, paddingBottom:20}}>Welcome {this.state.name}</Text>
       <Text style={{fontSize: 20, color:'purple', textAlign: 'center', paddingBottom:20}}>Choose a bike to start riding!</Text>
+      <NavigationEvents onDidFocus={() =>
+        this.getBikesAvailable(bikes => {
+          this.setBikeLocations(bikes, bikeLocations => {//might need .then
+            this.setState({markers: bikeLocations});
+          });
+          this.setState({bikesAvailable: bikes})})} />
         <MapView
           style={{ flex: 1 }}
           initialRegion={{
@@ -263,7 +279,7 @@ export default class HomeScreen extends React.Component {
             title={marker.title}
             pinColor = {'purple'}
             identifier = {marker.id}
-            onSelect={e => console.log(e.nativeEvent)}
+            //onSelect={e => console.log(e.nativeEvent)}
             onPress={() => {
               this.setModalVisible(!this.state.modalVisible);
               this._getLocationAsync();
@@ -308,8 +324,15 @@ export default class HomeScreen extends React.Component {
                           'Are you sure you would like to report this bike as Damaged?',
                           [
                               {text: 'Yes', onPress: () => {
-                                this.setModalVisible(!this.state.modalVisible),
-                                this.reportDamaged()
+                                console.log('testing')
+                                this.setModalVisible(!this.state.modalVisible);
+                                this.reportMissing();
+                                console.log('hello');
+                                this.getBikesAvailable(bikes => {
+                                  this.setBikeLocations(bikes, bikeLocations => {//might need .then
+                                    this.setState({markers: bikeLocations});
+                                  });
+                                  this.setState({bikesAvailable: bikes})});
                               }},
                               {
                               text: 'Cancel',
@@ -322,7 +345,13 @@ export default class HomeScreen extends React.Component {
                               <Text style={styles.saveButtonText}>Report Damaged</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.saveButton} onPress={() => {
-                    this.setModalVisible(!this.state.modalVisible);
+                    this.setModalVisible(!this.state.modalVisible),
+                    this.reportDamaged(),
+                    this.getBikesAvailable(bikes => {
+                      this.setBikeLocations(bikes, bikeLocations => {//might need .then
+                        this.setState({markers: bikeLocations});
+                      });
+                      this.setState({bikesAvailable: bikes})})
                     }}>
                     <Text style={styles.saveButtonText}>Cancel</Text>
                 </TouchableOpacity>
