@@ -9,6 +9,7 @@ var UserSchema = new Schema({
   last_name         : { type: String },
   email             : { type: String },
   strikes           : { type: Number },
+  admin             : { type: Boolean },
 });
 
 // Virtual for user's full name
@@ -30,7 +31,8 @@ UserSchema.methods.toUserJSONFor = function(user){
         first_name: this.first_name,
         last_name: this.last_name,
         email: this.email,
-        strikes: this.strikes
+        strikes: this.strikes,
+        admin: this.admin,
     };
 };
 

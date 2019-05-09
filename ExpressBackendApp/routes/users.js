@@ -30,19 +30,6 @@ router.get('/:id', (req, res, next) => {
   })
 })
 
-//Get user by email
-// router.get('/email', (req, res, next) => {
-//   let email = req.body.email;
-//   user.getUserByEmail(email, (err, user) => {
-//     if(err){
-//       res.json({success:false, message: `Failed to get user. Error: ${err}`});
-//     }
-//     else{
-//       res.write(JSON.stringify({success: true, user:user},null,2));
-//       res.end();
-//     }
-//   })
-// })
 
 // Add user (only if email isn't already in database)
 router.post('/', (req,res,next) => {
@@ -50,7 +37,8 @@ router.post('/', (req,res,next) => {
       first_name: req.body.first_name,
       last_name: req.body.last_name,
       email: req.body.email,
-      strikes: req.body.strikes
+      strikes: req.body.strikes,
+      admin: false,
   });
   user.getUserByEmail(req.body.email, (err, found_user) => {
     if(err){
@@ -72,6 +60,38 @@ router.post('/', (req,res,next) => {
     }
   })
 });
+
+
+// Manually update user's strikes or update to admin
+router.post('/:id', (req,res,next) => {
+
+  let updatedUser;
+  let userId = req.params.id;
+
+  //if strikes not specified in body, update is for admin
+  if(!req.body.strikes){
+      updatedUser = {
+        admin: req.body.admin,
+      };
+  //else update is for strikes
+  } else {
+      updatedBike = {
+          strikes : req.body.strikes,
+      };
+  }
+  user.update(userId, updatedUser,(err, user) => {
+      if(err) {
+          res.json({success: false, message: `Failed to update user. Error: ${err}`});
+      }
+      else if(user){
+          res.json({success:true, user:user, message: "User updated successfully."});
+      }else{
+          res.json({success:false});
+      }
+  });
+
+});
+
 
 //Delete user
 router.delete('/:id', (req,res,next)=> {

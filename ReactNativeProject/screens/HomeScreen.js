@@ -103,6 +103,11 @@ export default class HomeScreen extends React.Component {
     });
   };
 
+  // when admin button is pressed
+  onNavigateAdmin = () => {
+    this.navigate('Admin');
+  };
+
 
   // send rental instance to database (start ride)
   beginRide = (cb) => {
@@ -293,7 +298,8 @@ export default class HomeScreen extends React.Component {
                               {text: 'Yes', onPress: () => {
                                 this.setModalVisible(!this.state.modalVisible),
                                 this.reportMissing()
-                              }},                              {
+                              }},                              
+                              {
                               text: 'Cancel',
                               onPress: () => console.log('Cancel Pressed'),
                               style: 'cancel',
@@ -333,6 +339,9 @@ export default class HomeScreen extends React.Component {
 
           <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
                 <Text style={styles.saveButtonText}>Sign Out</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={()=>{this.navigate('Admin')}}>
+                <Text style={styles.saveButtonText}>Admin Page</Text>
           </TouchableOpacity>
       </View>
 
