@@ -89,7 +89,7 @@ export default class HomeScreen extends React.Component {
     bikeMarkers = []
     for (var i = 0; i < availableBikes.length; i++){
       bikeMarkers[i] = {
-        title : 'Bike' + toString(i),
+        title : 'Bike ' + availableBikes[i].label,
         coordinates: {
           latitude: availableBikes[i].currentLatitude,
           longitude: availableBikes[i].currentLongitude,
@@ -159,17 +159,16 @@ export default class HomeScreen extends React.Component {
       }),
     }).then((response) => response.json())
     .then((responseJson) => {
+      this.getBikesAvailable(bikes => {
+        this.setBikeLocations(bikes, bikeLocations => {//might need .then
+          this.setState({markers: bikeLocations});
+        });
+        this.setState({bikesAvailable: bikes})})
       return responseJson.rental._id;
     })
     .catch((error) => {
       console.error(error);
     });
-    // this.getBikesAvailable(bikes => {
-    //   this.setBikeLocations(bikes, bikeLocations => {//might need .then
-    //     console.log('hello');
-    //     this.setState({markers: bikeLocations});
-    //   });
-    //   this.setState({bikesAvailable: bikes})});
     cb();
 
   };
@@ -192,6 +191,11 @@ export default class HomeScreen extends React.Component {
       }),
     }).then((response) => response.json())
     .then((responseJson) => {
+      this.getBikesAvailable(bikes => {
+        this.setBikeLocations(bikes, bikeLocations => {//might need .then
+          this.setState({markers: bikeLocations});
+        });
+        this.setState({bikesAvailable: bikes})})
       return responseJson;
     })
     .catch((error) => {
@@ -314,18 +318,9 @@ export default class HomeScreen extends React.Component {
                           [
                               {text: 'Yes', onPress: () => {
                                 this.setModalVisible(!this.state.modalVisible),
-                              //  this.reportMissing(),//need to figure out how to finish this before calling getBikesAvailable
-                                this.getBikesAvailable(bikes => {
-                                  this.setBikeLocations(bikes, bikeLocations => {//might need .then
-                                    this.reportMissing(() =>
-                                      console.log('reporting missing')
-                                    ),
-                                    console.log('hello'),
-                                    this.setState({markers: bikeLocations})
-                                  });
-                                  console.log(this.state.bikesAvailable)
-                                  this.setState({bikesAvailable: bikes})})
-                              }},                              {
+                                this.reportMissing()
+                              }},
+                              {
                               text: 'Cancel',
                               onPress: () => console.log('Cancel Pressed'),
                               style: 'cancel',
@@ -341,12 +336,7 @@ export default class HomeScreen extends React.Component {
                           [
                               {text: 'Yes', onPress: () => {
                                 this.setModalVisible(!this.state.modalVisible),
-                                this.reportDamaged(),
-                                this.getBikesAvailable(bikes => {
-                                  this.setBikeLocations(bikes, bikeLocations => {//might need .then
-                                    this.setState({markers: bikeLocations});
-                                  });
-                                  this.setState({bikesAvailable: bikes})});
+                                this.reportDamaged()
                               }},
                               {
                               text: 'Cancel',
