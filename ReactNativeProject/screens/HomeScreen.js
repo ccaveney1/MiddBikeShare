@@ -90,7 +90,7 @@ export default class HomeScreen extends React.Component {
     bikeMarkers = []
     for (var i = 0; i < availableBikes.length; i++){
       bikeMarkers[i] = {
-        title : 'Bike' + toString(i),
+        title : 'Bike ' + availableBikes[i].label,
         coordinates: {
           latitude: availableBikes[i].currentLatitude,
           longitude: availableBikes[i].currentLongitude,
@@ -119,7 +119,6 @@ export default class HomeScreen extends React.Component {
     this.beginRide(rentalId => {
       this.navigate('Ride', {bike: this.state.bikeSelected, rentalId: rentalId});
     });
-    console.log('hello')
     this.setState({markersLoaded: true})
   };
 
@@ -150,7 +149,7 @@ export default class HomeScreen extends React.Component {
   };
 
   // send rental instance to database (missing)
-  reportMissing = () => {
+  reportMissing = (cb) => {
     return fetch('http://127.0.0.1:3000/rentals/', {
       method: 'POST',
       headers: {
@@ -167,11 +166,17 @@ export default class HomeScreen extends React.Component {
       }),
     }).then((response) => response.json())
     .then((responseJson) => {
+      this.getBikesAvailable(bikes => {
+        this.setBikeLocations(bikes, bikeLocations => {//might need .then
+          this.setState({markers: bikeLocations});
+        });
+        this.setState({bikesAvailable: bikes})})
       return responseJson.rental._id;
     })
     .catch((error) => {
       console.error(error);
     });
+    cb();
 
   };
 
@@ -193,6 +198,11 @@ export default class HomeScreen extends React.Component {
       }),
     }).then((response) => response.json())
     .then((responseJson) => {
+      this.getBikesAvailable(bikes => {
+        this.setBikeLocations(bikes, bikeLocations => {//might need .then
+          this.setState({markers: bikeLocations});
+        });
+        this.setState({bikesAvailable: bikes})})
       return responseJson;
     })
     .catch((error) => {
@@ -214,7 +224,7 @@ export default class HomeScreen extends React.Component {
             availableBikes.push(bikes[i]);
           }
         }
-        console.log(availableBikes)
+        //console.log(availableBikes)
         cb(availableBikes);
       })
       .catch((error) => {
@@ -321,7 +331,8 @@ export default class HomeScreen extends React.Component {
                               {text: 'Yes', onPress: () => {
                                 this.setModalVisible(!this.state.modalVisible),
                                 this.reportMissing()
-                              }},                              {
+                              }},
+                              {
                               text: 'Cancel',
                               onPress: () => console.log('Cancel Pressed'),
                               style: 'cancel',
@@ -336,15 +347,8 @@ export default class HomeScreen extends React.Component {
                           'Are you sure you would like to report this bike as Damaged?',
                           [
                               {text: 'Yes', onPress: () => {
-                                console.log('testing')
-                                this.setModalVisible(!this.state.modalVisible);
-                                this.reportMissing();
-                                console.log('hello');
-                                this.getBikesAvailable(bikes => {
-                                  this.setBikeLocations(bikes, bikeLocations => {//might need .then
-                                    this.setState({markers: bikeLocations});
-                                  });
-                                  this.setState({bikesAvailable: bikes})});
+                                this.setModalVisible(!this.state.modalVisible),
+                                this.reportDamaged()
                               }},
                               {
                               text: 'Cancel',
@@ -357,13 +361,7 @@ export default class HomeScreen extends React.Component {
                               <Text style={styles.saveButtonText}>Report Damaged</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.cancelButton} onPress={() => {
-                    this.setModalVisible(!this.state.modalVisible),
-                    this.reportDamaged(),
-                    this.getBikesAvailable(bikes => {
-                      this.setBikeLocations(bikes, bikeLocations => {//might need .then
-                        this.setState({markers: bikeLocations});
-                      });
-                      this.setState({bikesAvailable: bikes})})
+                    this.setModalVisible(!this.state.modalVisible)
                     }}>
                     <Text style={styles.saveButtonText}>Cancel</Text>
                 </TouchableOpacity>
