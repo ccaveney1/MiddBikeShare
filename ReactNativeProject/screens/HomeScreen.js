@@ -331,7 +331,7 @@ export default class HomeScreen extends React.Component {
 
           </Modal>
 
-          <TouchableOpacity style={styles.saveButton} onPress={this._signOutAsync}>
+          <TouchableOpacity style={styles.signOutButton} onPress={this._signOutAsync}>
                 <Text style={styles.saveButtonText}>Sign Out</Text>
           </TouchableOpacity>
       </View>
@@ -420,6 +420,14 @@ const styles = StyleSheet.create({
       paddingVertical: 15,
       margin: 5,
       width: 250,
+    },
+    signOutButton: {
+      borderWidth: 1,
+      borderColor: 'purple',
+      backgroundColor: 'purple',
+      paddingHorizontal: 40,
+      paddingVertical: 15,
+      margin: 5
     },
     cancelButton: {
       borderWidth: 1,
