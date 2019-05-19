@@ -18,6 +18,7 @@ import { Location } from 'expo';
 import { Permissions } from 'expo';
 
 
+
 export default class AdminScreen extends React.Component {
   static navigationOptions = {
     title: 'Admin Page',
@@ -28,17 +29,21 @@ export default class AdminScreen extends React.Component {
     super(props);
     this.navigate = this.props.navigation.navigate;
   }
-  state = {
-      bikes: [],
-      users: [],
-      bikeSelected: null,
-      modalVisible: false,
-  };
 
-  componentDidMount() {
-    this.getBikes(bikes => {
-      this.setState({bikes})});
-}
+
+
+  // get current location with permissions
+  _getLocationAsync = async () => {
+    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status !== 'granted') {
+      this.setState({
+        errorMessage: 'Permission to access location was denied',
+      });
+    }
+    let location = await Location.getCurrentPositionAsync({});
+    this.setState({latitude: location.coords.latitude, longitude: location.coords.longitude});
+    return location;
+  };
 
   getBikes = (cb) => {
     return fetch('https://midd-bikeshare-backend.herokuapp.com/bikes/')
@@ -52,121 +57,86 @@ export default class AdminScreen extends React.Component {
       });
   };
 
-  getUsers = () => {};
+  getUsers = (cb) => {
+    return fetch('https://midd-bikeshare-backend.herokuapp.com/users/')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let bikes = responseJson.users;
+        cb(users);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
-  getRentals = () => {};
+  getUserObject = (userId, cb) => {
+    let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
+    return fetch(url)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let user = responseJson.user;
+        cb(user);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
-  makeAdmin = () => {};
+  getRentals = (cb) => {
+    return fetch('https://midd-bikeshare-backend.herokuapp.com/rentals/')
+      .then((response) => response.json())
+      .then((responseJson) => {
+        let bikes = responseJson.rentals;
+        cb(rentals);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  makeAdmin = (userId) => {
+    let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        admin: admin,
+      })
+    });
+  };
 
   addStrike = () => {};
 
-  updateBikeStatus = () => {};
-
-  updateBikeLocation = () => {};
-
-  updateBikeUser = () => {};
-
-  addBike = () => {};
-
-  deleteBike = () => {};
 
   deleteUser = () => {};
 
-  FlatListItemSeparator = () => {
-    return (
-      <View
-        style={{
-          height: 1,
-          width: "100%",
-          backgroundColor: "#607D8B",
-        }}
-      />
-    );
-  }
-
-  BikeItem = (item) => {
-      return(
-        <View>
-            <Text style={styles.item} i={item} onPress={() => {
-                console.log(this.i);
-                console.log("break");
-                this.setState({bikeSDataTransferItemListelected: i});
-                this.setState({modalVisible: true});
-                console.log(this.state.bikeSelected);
-                }} > 
-                Bike Number {item.label}, {item.status}
-            </Text>
-            {/* <View>
-                <Modal
-                    animationType="fade"
-                    transparent={true}
-                    visible={this.state.modalVisible}
-                    >
-                    <View style={styles.modal}>
-                    <View style={styles.modalView}>
-                        <Text>hey</Text>
-                    </View>
-                    </View>
-    
-                </Modal>
-            </View> */}
-        </View>
-      );
-
-  }
-
-
-//   GetItem = (item) => { 
-//     console.log(item);
-//     this.setState({modalVisible: true});
-//   }
-
-BikeModal = (item) => (
-    <Modal
-            animationType="fade"
-            transparent={true}
-            visible={this.state.modalVisible}
-            >
-            <View style={styles.modal}>
-            <View style={styles.modalView}>
-                <Text>hey</Text>
-            </View>
-            </View>
-
-    </Modal>
-)
 
   keyExtractor = (item) => item._id;
 
-//   DisplayModal = (props) => (
-//     <Modal visible={ props.display } animationType = "slide" 
-//            onRequestClose={ () => console.log('closed') }>>
-//       <View>
-//         <Image 
-//           source = { props.image } 
-//           style = { styles.image } />
-//         <Text style = { styles.text }>
-//           { props.data }
-//         </Text>
-//       </View>
-//     </Modal>
-//   )
-  
 
   
     render() {
       return (
+        <View style={{flex:1, justifyContent:'center', backgroundColor: 'purple'}}>
         <View style={styles.MainContainer}>
-  
-       <FlatList
-          data={ this.state.bikes }   
-          ItemSeparatorComponent = {this.FlatListItemSeparator}
-          keyExtractor={this.keyExtractor}
-          renderItem={({item}) => this.BikeItem(item)}
-        />
+
+          <TouchableOpacity style={styles.saveButton} onPress={()=>{this.navigate('Bikes')}}>
+                <Text style={styles.saveButtonText}>Manage Bikes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={()=>{this.navigate('Users')}}>
+                <Text style={styles.saveButtonText}>Manage Users</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={()=>{this.navigate('Home')}}>
+                <Text style={styles.saveButtonText}>Return to Home</Text>
+          </TouchableOpacity>
+          
 
         
 
+        </View>
         </View>
       );
     }
@@ -176,45 +146,26 @@ BikeModal = (item) => (
 
 
 const styles = StyleSheet.create({
-    MainContainer :{
- 
-        // Setting up View inside content in Vertically center.
-        justifyContent: 'center',
-        flex:1,
-        margin: 10
-         
-        },
-         
-        item: {
-            padding: 10,
-            fontSize: 18,
-            height: 44,
+          MainContainer :{
+          justifyContent: 'space-around',
+          flex:1,
+          margin: 10,
+          alignItems: 'center',
           },
-          modal: {
-            flex:1,
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            // borderColor:'#cccccc',
-            // margin:2,
-            // borderRadius:10,
-            // shadowOffset:{  width: 10,  height: 10,  },
-            // shadowColor: 'black',
-            // shadowOpacity: 1.0,
-            // backgroundColor:'#fff',
+
+
+          saveButton: {
+            borderWidth: 1,
+            borderRadius: 30,
+            borderColor: 'white',
+            backgroundColor: 'white',
+            paddingVertical: 15,
+            margin: 5,
+            width: 250,
           },
-        
-          modalView: {
-            backgroundColor:'#fff',
-            width: 350,
-            height: 300,
-            borderColor:'#cccccc',
-            margin:2,
-            borderRadius:10,
-            shadowOffset:{  width: 10,  height: 10,  },
-            shadowColor: 'black',
-            shadowOpacity: .8,
-            justifyContent: 'center',
-            alignItems: 'center'
-          }
+          saveButtonText: {
+            color: 'purple',
+            fontSize: 20,
+            textAlign: 'center'
+          },
 });

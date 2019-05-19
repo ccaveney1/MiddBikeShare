@@ -7,10 +7,14 @@ import AuthLoadingScreen from '../screens/AuthLoadingScreen';
 import HomeScreen from '../screens/HomeScreen';
 import RideScreen from '../screens/RideScreen';
 import AdminScreen from '../screens/AdminScreen';
+import BikesComponent from '../screens/admin_components/BikesComponent';
+import UsersComponent from '../screens/admin_components/UsersComponent';
 
 
-const AppStack = createStackNavigator({ Home: HomeScreen, Ride: RideScreen, Admin: AdminScreen });
+
 const AuthStack = createStackNavigator({ Login: LoginScreen });
+const AppStack = createStackNavigator({ Home: HomeScreen, Ride: RideScreen, Admin: AdminScreen, Bikes: BikesComponent, Users: UsersComponent });
+
 
 export default createAppContainer(createSwitchNavigator(
   {

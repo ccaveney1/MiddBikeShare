@@ -20,10 +20,6 @@ export default class LoginScreen extends React.Component {
     title: 'Please sign in',
   };
 
-  static navigationOptions = {
-    title: 'Login',
-  };
-
   render() {
     return (
       <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
