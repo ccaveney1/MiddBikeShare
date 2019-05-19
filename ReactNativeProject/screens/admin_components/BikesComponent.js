@@ -28,10 +28,6 @@ export default class BikesComponent extends React.Component {
     this.mounted = false;
   }
 
-  static navigationOptions = {
-    title: 'Manage Bikes',
-    header: null,
-  };
 
   state = {
       bikes: [],
@@ -179,7 +175,16 @@ export default class BikesComponent extends React.Component {
     })
   };
 
-  deleteBike = () => {};
+  deleteBike = (bikeId) => {
+    let url = 'https://midd-bikeshare-backend.herokuapp.com/bikes/'.concat(bikeId);
+    return fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      }
+    });
+  };
 
 
 
@@ -320,7 +325,25 @@ export default class BikesComponent extends React.Component {
               )}}>
               <Text style={styles.buttonText}>Update to your current location</Text>
             </TouchableHighlight>
-            <TouchableHighlight style={styles.buttonStyleLocation}>
+            <TouchableHighlight style={styles.buttonStyleLocation}
+            onPress={() => {
+              Alert.alert(
+                'Remove Bike ' + item.label,
+                'Are you sure you would like to delete this bike from the database?',
+                [
+                    {text: 'Yes', onPress: () => {
+                      this.deleteBike(item._id);
+                    }},
+                    {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel',
+                    }
+                ],
+                {cancelable: false},
+          )
+            }}
+            >
               <Text style={styles.buttonText}>Remove Bike</Text>
             </TouchableHighlight>
         </View>
@@ -340,18 +363,49 @@ export default class BikesComponent extends React.Component {
         <View style={{flex:1, justifyContent:'center', backgroundColor: 'purple'}}>
         <View style={styles.MainContainer}>
 
-      <Text style = {{fontSize:24, color: 'white', paddingTop:30}}>Manage Bikes</Text>
+      <Text style = {{fontSize:24, color: 'white', padding:10}}>Manage Bikes</Text>
 
-      <TouchableHighlight style={styles.buttonStyleAdd}>
-          <Text style={styles.buttonText}>Add a Bike</Text>
+      <View style={{flex:1, flexDirection: 'row', marginBottom: 30, paddingBottom: 30}}>
+      <TouchableHighlight style={styles.buttonStyleAdd}
+      onPress={()=>{
+        if(this.state.labelInputText === ''){
+          Alert.alert(
+            'No Label Entered',
+            'Please enter a unique label for the bike',
+            [
+                {text: 'Ok', onPress: () => {
+                }},
+            ],
+            {cancelable: false},
+      )}
+        else{
+        Alert.alert(
+              'Add Bike',
+              'Are you sure you would like to add a bike with label ' + this.state.labelInputText,
+              [
+                  {text: 'Yes', onPress: () => {
+                    this.addBike(this.state.labelInputText);
+                  }},
+                  {
+                  text: 'Cancel',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                  }
+              ],
+              {cancelable: false},
+        )}}
+            }
+      >
+          <Text style={{color: 'purple', marginHorizontal: 10}}>Add a Bike</Text>
       </TouchableHighlight>
       <TextInput
             placeholder='Label'
-            style={{height: 20, borderColor: 'white', backgroundColor:'white', borderWidth: 2}}
+            style={{height: 30, width: 60, borderColor: 'white', backgroundColor:'white', borderWidth: 2, borderRadius: 5, marginHorizontal: 20}}
             onChangeText={(text) => this.setState({labelInputText: text})}
             value={this.state.labelInputText}
-            maxLength = {2}
+            maxLength = {3}
           />
+      </View>
       
   
        <FlatList

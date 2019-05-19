@@ -16,10 +16,10 @@ router.get('/',(req,res) => {
     });
 });
 
-// Get email by id
+// Get user by id
 router.get('/:id', (req, res, next) => {
   let id = req.params.id;
-  user.getUserEmailById(id, (err, user) => {
+  user.getUserById(id, (err, user) => {
     if(err){
       res.json({success:false, message: `Failed to get the user. Error: ${err}`});
     }

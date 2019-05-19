@@ -45,9 +45,9 @@ module.exports.getAllUsers = (callback) => {
     User.find(callback);
 }
 
-//Find a user and return email
-module.exports.getUserEmailById = (id, callback) => {
-    User.findById(id, 'email', callback);
+//Find a user and return
+module.exports.getUserById = (id, callback) => {
+    User.findById(id, callback);
 }
 
 //Add a user
