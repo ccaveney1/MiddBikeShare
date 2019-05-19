@@ -66,3 +66,9 @@ module.exports.getUserByEmail = (email, callback) => {
     User.findOne({email: email}, callback);
 }
 
+//Update user with ID
+module.exports.update = (id, updatedUser, callback) => {
+    let query = {_id: id};
+    User.findByIdAndUpdate(query, updatedUser, {new: true}, callback);
+  }
+
