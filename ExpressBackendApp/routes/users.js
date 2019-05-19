@@ -75,7 +75,7 @@ router.post('/:id', (req,res,next) => {
       };
   //else update is for strikes
   } else {
-      updatedBike = {
+      updatedUser = {
           strikes : req.body.strikes,
       };
   }
