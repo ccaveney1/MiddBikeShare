@@ -15,14 +15,6 @@ var RentalInstanceSchema = new Schema({
     startLongitude    : {type: Number},
     endLatitude       : {type: Number},
     endLongitude      : {type: Number},
-    // startLocation     : { 
-    //                     lat: { type: Number },
-    //                     long: { type: Number }
-    //                     },
-    // endLocation       : { 
-    //                     lat: { type: Number },
-    //                     long: { type: Number }
-    //                     },
     startTime         : { type: Date },
     endTime           : { type: Date },
     reportDamaged     : { type: Boolean },

@@ -37,7 +37,7 @@ router.post('/', (req,res,next) => {
       status: req.body.status,
       currentLatitude: req.body.currentLatitude,
       currentLongitude: req.body.currentLongitude,
-      currentUser: null,
+      currentUser: req.body.currentUser,
       label: req.body.label,
   });
   bike.addBike(newBike,(err, bike) => {

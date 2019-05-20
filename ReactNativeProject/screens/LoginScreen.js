@@ -20,10 +20,6 @@ export default class LoginScreen extends React.Component {
     title: 'Please sign in',
   };
 
-  static navigationOptions = {
-    title: 'Login',
-  };
-
   render() {
     return (
       <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
@@ -59,7 +55,7 @@ export default class LoginScreen extends React.Component {
 
 saveUser = async (user) => {
   try {
-    const response = await fetch('http://127.0.0.1:3000/users/', {
+    const response = await fetch('https://midd-bikeshare-backend.herokuapp.com/users/', {
       method: 'POST',
       headers: {
         Accept: 'application/json',

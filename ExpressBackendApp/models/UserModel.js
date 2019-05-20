@@ -9,6 +9,7 @@ var UserSchema = new Schema({
   last_name         : { type: String },
   email             : { type: String },
   strikes           : { type: Number },
+  admin             : { type: Boolean },
 });
 
 // Virtual for user's full name
@@ -30,7 +31,8 @@ UserSchema.methods.toUserJSONFor = function(user){
         first_name: this.first_name,
         last_name: this.last_name,
         email: this.email,
-        strikes: this.strikes
+        strikes: this.strikes,
+        admin: this.admin,
     };
 };
 
@@ -43,9 +45,9 @@ module.exports.getAllUsers = (callback) => {
     User.find(callback);
 }
 
-//Find a user and return email
-module.exports.getUserEmailById = (id, callback) => {
-    User.findById(id, 'email', callback);
+//Find a user and return
+module.exports.getUserById = (id, callback) => {
+    User.findById(id, callback);
 }
 
 //Add a user
@@ -63,4 +65,10 @@ module.exports.deleteUserById = (id, callback) => {
 module.exports.getUserByEmail = (email, callback) => {
     User.findOne({email: email}, callback);
 }
+
+//Update user with ID
+module.exports.update = (id, updatedUser, callback) => {
+    let query = {_id: id};
+    User.findByIdAndUpdate(query, updatedUser, {new: true}, callback);
+  }
 

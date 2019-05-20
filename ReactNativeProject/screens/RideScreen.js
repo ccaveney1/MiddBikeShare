@@ -39,7 +39,7 @@ export default class RideScreen extends React.Component {
 
   endRide = () => {
     this._getLocationAsync().then(() => {
-      let url = 'http://127.0.0.1:3000/rentals/'.concat(this.rentalId);
+      let url = 'https://midd-bikeshare-backend.herokuapp.com/rentals/'.concat(this.rentalId);
       fetch(url, {
         method: 'POST',
         headers: {
@@ -64,7 +64,7 @@ export default class RideScreen extends React.Component {
 
   reportDamaged = () => {
     this._getLocationAsync().then(() => {
-      let url = 'http://127.0.0.1:3000/rentals/'.concat(this.rentalId);
+      let url = 'https://midd-bikeshare-backend.herokuapp.com/rentals/'.concat(this.rentalId);
       fetch(url, {
         method: 'POST',
         headers: {
@@ -112,7 +112,7 @@ export default class RideScreen extends React.Component {
 
   // get array of available bike objects from database
   getBikesAvailable = (cb) => {
-    return fetch('http://127.0.0.1:3000/bikes/')
+    return fetch('https://midd-bikeshare-backend.herokuapp.com/bikes/')
       .then((response) => response.json())
       .then((responseJson) => {
         let bikes = responseJson.bikes;
