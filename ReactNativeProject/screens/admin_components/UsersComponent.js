@@ -157,13 +157,13 @@ export default class UsersComponent extends React.Component {
                     onPress={()=>this.updateStrikes(item._id, true)}
                     style={styles.buttonStyle}
                     >
-                    <Text>Add</Text>
+                    <Text style={{color:'white'}}>Add</Text>
                 </TouchableHighlight>
                 <TouchableHighlight
                     onPress={()=>this.updateStrikes(item._id, false)}
                     style={styles.buttonStyle}
                     >
-                    <Text>Subtact</Text>
+                    <Text style={{color:'white'}}>Subtact</Text>
                 </TouchableHighlight>
             </View>
             <Text>Admin Privileges: {item.admin}</Text>
@@ -188,7 +188,7 @@ export default class UsersComponent extends React.Component {
                         {cancelable: false},
                     )
                     }}>
-                        <Text>Change Privileges</Text>
+                        <Text style={{color:'white'}}>Change Privileges</Text>
                 </TouchableHighlight>
             </View>
             
@@ -279,6 +279,7 @@ export default class UsersComponent extends React.Component {
           margin:5,
           alignItems: 'center',
           justifyContent: 'center',
+          borderRadius: 5,
         },
         buttonStyleHighlight :{
           height: 30,
@@ -287,6 +288,7 @@ export default class UsersComponent extends React.Component {
           margin:5,
           alignItems: 'center',
           justifyContent: 'center',
+          borderRadius: 5,
         },
 
         buttonStyleLocation :{
@@ -296,6 +298,7 @@ export default class UsersComponent extends React.Component {
           marginBottom:10,
           alignItems: 'center',
           justifyContent: 'center',
+          borderRadius: 5,
         },
 
         buttonText: {

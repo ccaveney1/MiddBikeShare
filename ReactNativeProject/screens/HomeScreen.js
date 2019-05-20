@@ -325,11 +325,11 @@ export default class HomeScreen extends React.Component {
             <View style={styles.modal}>
             <View style={styles.modalView}>
                 <TouchableOpacity
-                    style={styles.saveButton}
+                    style={styles.modalButtons}
                     onPress={() => {this.onNavigateRide()}}>
                               <Text style={styles.saveButtonText}>Begin Rental</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
+                <TouchableOpacity style={styles.modalButtons} onPress={()=>Alert.alert(
                           'Bike Number ' + this.state.bikeSelected.label,
                           'Are you sure you would like to report this bike as Missing?',
                           [
@@ -347,7 +347,7 @@ export default class HomeScreen extends React.Component {
                 )}>
                               <Text style={styles.saveButtonText}>Report Missing</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.saveButton} onPress={()=>Alert.alert(
+                <TouchableOpacity style={styles.modalButtons} onPress={()=>Alert.alert(
                           'Bike Number ' + this.state.bikeSelected.label,
                           'Are you sure you would like to report this bike as Damaged?',
                           [
@@ -461,11 +461,21 @@ const styles = StyleSheet.create({
   },
   saveButton: {
       borderWidth: 1,
-      borderRadius: 30,
+      borderRadius: 5,
       borderColor: 'purple',
       backgroundColor: 'purple',
       paddingVertical: 15,
       margin: 5,
+      height: 60,
+    },
+    modalButtons: {
+      borderWidth: 1,
+      borderRadius: 5,
+      borderColor: 'purple',
+      backgroundColor: 'purple',
+      paddingVertical: 15,
+      margin: 5,
+      height: 60,
       width: 250,
     },
     cancelButton: {
