@@ -29,6 +29,9 @@ export default class RideScreen extends React.Component {
     this.bike = this.props.navigation.getParam('bike');
     this.rentalId = this.props.navigation.getParam('rentalId');
   }
+
+  //latitude and longitude of the user, the bike ID, and bikes and markers
+  //from database
   state = {
     latitude: null,
     longitude: null,
@@ -37,6 +40,7 @@ export default class RideScreen extends React.Component {
     bikesAvailable: null
   };
 
+//when the ride ends update the location to the database
   endRide = () => {
     this._getLocationAsync().then(() => {
       let url = 'https://midd-bikeshare-backend.herokuapp.com/rentals/'.concat(this.rentalId);
@@ -55,13 +59,14 @@ export default class RideScreen extends React.Component {
       });
     });
     this.getBikesAvailable(bikes => {
-      this.setBikeLocations(bikes, bikeLocations => {//might need .then
+      this.setBikeLocations(bikes, bikeLocations => {
         this.setState({markers: bikeLocations});
         console.log(this.state.markers);
       });
       this.setState({bikesAvailable: bikes})});
   };
 
+//If the user reports the bike as damaged after the ride, then update the database
   reportDamaged = () => {
     this._getLocationAsync().then(() => {
       let url = 'https://midd-bikeshare-backend.herokuapp.com/rentals/'.concat(this.rentalId);
@@ -130,6 +135,7 @@ export default class RideScreen extends React.Component {
       });
   };
 
+//Render the Ride Screen 
   render() {
 
     return (

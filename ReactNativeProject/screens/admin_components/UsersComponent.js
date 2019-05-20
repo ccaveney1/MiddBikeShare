@@ -20,23 +20,20 @@ import { Permissions } from 'expo';
 
 
 export default class UsersComponent extends React.Component {
-//   static navigationOptions = {
-//     title: 'Admin Page',
-//     header: null,
-//   };
 
   constructor(props) {
     super(props);
     this.navigate = this.props.navigation.navigate;
     this.mounted = false;
   }
+  //state in Admin users screen are the users in the system and their ID
   state = {
       users: [],
       user_id: null,
   };
 
 
-
+//When the page loads get the users from the database and set that as the state
   componentDidMount() {
     this.mounted=true;
     this.getUsers(users => {
@@ -47,7 +44,7 @@ export default class UsersComponent extends React.Component {
     AsyncStorage.getItem('user_id').then((user_id) => {this.setState({user_id})});
   }
 
-
+//When the page updates, get the users from the database and set them as the state
   componentDidUpdate() {
     this.getUsers(users => {
         if(this.mounted){
@@ -60,7 +57,7 @@ export default class UsersComponent extends React.Component {
     this.mounted=false;
   }
 
-
+//Callback function to database to get all users
   getUsers = (cb) => {
       if(this.mounted){
         return fetch('https://midd-bikeshare-backend.herokuapp.com/users/')
@@ -75,6 +72,7 @@ export default class UsersComponent extends React.Component {
     }
   };
 
+//Callback function to get admin user ID
   getUserObject = (userId, cb) => {
     if(this.mounted){
       let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
@@ -90,7 +88,7 @@ export default class UsersComponent extends React.Component {
       }
   };
 
-
+//Callback function to give a user administrative capabilities in the database
   makeAdmin = (userId, admin) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
     return fetch(url, {
@@ -105,6 +103,8 @@ export default class UsersComponent extends React.Component {
     });
   };
 
+//If buttons are pressed to add or remove strikes for poor behavior this
+//function is called and a post to the database is made
   updateStrikes = (userId, addBool) => {
     this.getUserObject(userId, (user) => {
         let strikes = user.strikes;
@@ -127,7 +127,7 @@ export default class UsersComponent extends React.Component {
     })
   };
 
-
+//If admin deletes a User, make call to delete them from the database
   deleteUser = (user) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
     return fetch(url, {
@@ -141,14 +141,14 @@ export default class UsersComponent extends React.Component {
 
 
   keyExtractor = (item) => item._id;
-
+//Style for each user card on the page
   UserItem = (item) => {
     return(
       <View style={styles.modalView}>
-            <Text style={styles.item}> 
+            <Text style={styles.item}>
                 {item.last_name}, {item.first_name}
             </Text>
-            <Text> 
+            <Text>
                 {item.email}
             </Text>
             <Text>Strikes: {item.strikes}</Text>
@@ -168,7 +168,7 @@ export default class UsersComponent extends React.Component {
             </View>
             <Text>Admin Privileges: {item.admin}</Text>
             <View style={{flex:1, flexDirection: 'row'}}>
-                <TouchableHighlight 
+                <TouchableHighlight
                 style={styles.buttonStyleLocation}
                 onPress={()=>{
                     console.log(item);
@@ -191,7 +191,6 @@ export default class UsersComponent extends React.Component {
                         <Text style={{color:'white'}}>Change Privileges</Text>
                 </TouchableHighlight>
             </View>
-            
             <TouchableHighlight style={styles.buttonStyleLocation}
             onPress={() => {
                 if(item._id != this.state.user_id){
@@ -221,7 +220,7 @@ export default class UsersComponent extends React.Component {
                         {cancelable: false},
                   )
                 }
-              
+
             }}
             >
               <Text style={styles.buttonText}>Remove User</Text>
@@ -232,21 +231,21 @@ export default class UsersComponent extends React.Component {
 }
 
 
-  
+
     render() {
       return (
         <View style={{flex:1, justifyContent:'center', backgroundColor: 'purple'}}>
         <View style={styles.MainContainer}>
 
         <Text style = {{fontSize:24, color: 'white', padding:10}}>Manage Users</Text>
-  
+
        <FlatList
-          data={ this.state.users }   
+          data={ this.state.users }
           keyExtractor={this.keyExtractor}
           renderItem={({item}) => this.UserItem(item)}
         />
 
-        
+
 
         </View>
         </View>
@@ -256,10 +255,10 @@ export default class UsersComponent extends React.Component {
 
 
 
-
+//button style sheet
   const styles = StyleSheet.create({
     MainContainer :{
- 
+
         // Setting up View inside content in Vertically center.
         justifyContent: 'center',
         flex:1,
@@ -304,12 +303,12 @@ export default class UsersComponent extends React.Component {
         buttonText: {
           color: 'white',
         },
-         
+
         item: {
             padding: 10,
             fontSize: 18,
           },
-        
+
           modalView: {
             backgroundColor:'white',
             width: 380,

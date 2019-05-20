@@ -27,7 +27,6 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.navigate = this.props.navigation.navigate;
-    //this.state.markers = this.props.navigation.state.params.getParam('markers');
   }
 
 
@@ -35,10 +34,14 @@ export default class HomeScreen extends React.Component {
     title: 'Home',
     header: null,
   };
+  //state of the home screen is the name of the user,
+  //whether the bike modal is visible, which bike is selected, which bikes are
+  //available, errorMessage for location, boolean refreshing state, user ID, latitude
+  //and longitude of user, and the marker locations
   state = {
     location: null,
     name: null, //user's first name; retrieved from google sign-in/async storage
-    modalVisible: false,
+    modalVisible: false, //if the rental modal is visible
     bikeSelected: null, //bike object
     bikesAvailable: null, //array of bike objects
     errorMessage: null, //error message for location permissions
@@ -49,11 +52,11 @@ export default class HomeScreen extends React.Component {
     markers: [{coordinates: {
       latitude: 0,
       longitude:0
-    }}],
-    markersLoaded: false
+    }}]
   };
 
-  // set first name, user id, and available bikes in state as soon as component mounts
+  // set first name, user id, available bikes, and marker locations
+  //in state as soon as component mounts
   componentDidMount() {
       AsyncStorage.getItem('first_name', (err, first_name) => {
         if(err){console.log(err)}
@@ -64,25 +67,10 @@ export default class HomeScreen extends React.Component {
         else{this.setState({ userId: user_id })};
       })
       this.getBikesAvailable(bikes => {
-        this.setBikeLocations(bikes, bikeLocations => {//might need .then
-          console.log(this.state.markers)
+        this.setBikeLocations(bikes, bikeLocations => {
           this.setState({markers: bikeLocations});
         });
         this.setState({bikesAvailable: bikes})});
-  }
-
-  // not implemented yet... goal is to refresh map with available bikes
-  _onRefresh = () => {
-    this.setState({refreshing: true});
-    this.setBikeLocations(bikes, bikeLocations => {//might need .then
-      this.setState({markers: bikeLocations});
-      //console.log(this.state.markers)
-    })
-      .then(() => {
-    this.getBikesAvailable(bikes => {this.setState({bikesAvailable: bikes})})})
-      .then(() => {
-      this.setState({refreshing: false});
-    });
   }
 
 //Sets up list of bike markers to be placed on the map
@@ -98,7 +86,6 @@ export default class HomeScreen extends React.Component {
         id : availableBikes[i]._id
         }
       }
-      //console.log(bikeMarkers);
       cb(bikeMarkers);
     }
 
@@ -119,7 +106,6 @@ export default class HomeScreen extends React.Component {
     this.beginRide(rentalId => {
       this.navigate('Ride', {bike: this.state.bikeSelected, rentalId: rentalId});
     });
-    this.setState({markersLoaded: true})
   };
 
   // when admin button is pressed
@@ -229,7 +215,6 @@ export default class HomeScreen extends React.Component {
             availableBikes.push(bikes[i]);
           }
         }
-        //console.log(availableBikes)
         cb(availableBikes);
       })
       .catch((error) => {
@@ -279,12 +264,12 @@ export default class HomeScreen extends React.Component {
   render() {
 
 
-
+//Render screen
     return (
-      
       <View style={styles.container}>
       <Text style={{fontSize: 30, color:'purple', textAlign: 'center', paddingTop: 50, paddingBottom:20}}>Welcome {this.state.name}</Text>
       <Text style={{fontSize: 20, color:'purple', textAlign: 'center', paddingBottom:20}}>Choose a bike to start riding!</Text>
+      {/*When the page is navigated back to reset the state of the markers*/}
       <NavigationEvents onDidFocus={() =>
         this.getBikesAvailable(bikes => {
           this.setBikeLocations(bikes, bikeLocations => {//might need .then
@@ -292,31 +277,34 @@ export default class HomeScreen extends React.Component {
           });
           this.setState({bikesAvailable: bikes})})} />
         <MapView
+          //sets initial map region to Middlebury's campus
           style={{ flex: 1 }}
           initialRegion={{
             latitude: 44.009690,
             longitude: -73.177175,
             latitudeDelta: 0.0052,
             longitudeDelta: 0.011,
-          }}>{this.state.markers.map((marker, index) => (
+          }}>
+            {/*for each marker in the state, set it's marker location*/}
+            {this.state.markers.map((marker, index) => (
             <MapView.Marker
             coordinate={marker.coordinates}
             key={index}
             title={marker.title}
             pinColor = {'purple'}
             identifier = {marker.id}
-            //onSelect={e => console.log(e.nativeEvent)}
             onPress={() => {
               this._getLocationAsync();
               this.selectBike(marker.id).then(() => {
                 this.setModalVisible(!this.state.modalVisible);
-              })   
+              })
               }}
             ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
           ))}</MapView>
 
 
           <Modal
+            //Rental modal
             onNavigateRide={this.onNavigateRide}
             animationType="fade"
             transparent={true}
@@ -389,6 +377,7 @@ export default class HomeScreen extends React.Component {
 
 }
 
+//Button styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -497,14 +486,7 @@ const styles = StyleSheet.create({
       flex:1,
       flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'center',
-      // borderColor:'#cccccc',
-      // margin:2,
-      // borderRadius:10,
-      // shadowOffset:{  width: 10,  height: 10,  },
-      // shadowColor: 'black',
-      // shadowOpacity: 1.0,
-      // backgroundColor:'#fff',
+      justifyContent: 'center'
     },
 
     modalView: {

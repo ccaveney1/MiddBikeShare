@@ -19,7 +19,7 @@ export default class LoginScreen extends React.Component {
   static navigationOptions = {
     title: 'Please sign in',
   };
-
+//Render login screen, with Bikeshare title and image
   render() {
     return (
       <View style={{alignItems: 'center', justifyContent: 'center', flex: 1}}>
@@ -35,6 +35,8 @@ export default class LoginScreen extends React.Component {
       </View>
     );
   }
+
+  //Sign in using Google Sign In API
   _signInAsync = async () => {
     const clientId = '108117962987-96atlk0mjo5re9nasjarq2a7m7gnfbub.apps.googleusercontent.com';
     try {
@@ -53,6 +55,7 @@ export default class LoginScreen extends React.Component {
   }
 }
 
+//Save user so they don't have to login more than once
 saveUser = async (user) => {
   try {
     const response = await fetch('https://midd-bikeshare-backend.herokuapp.com/users/', {

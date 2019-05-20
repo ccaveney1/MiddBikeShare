@@ -45,6 +45,7 @@ export default class AdminScreen extends React.Component {
     return location;
   };
 
+//Get bikes from the database
   getBikes = (cb) => {
     return fetch('https://midd-bikeshare-backend.herokuapp.com/bikes/')
       .then((response) => response.json())
@@ -57,6 +58,7 @@ export default class AdminScreen extends React.Component {
       });
   };
 
+//Get users from the database
   getUsers = (cb) => {
     return fetch('https://midd-bikeshare-backend.herokuapp.com/users/')
       .then((response) => response.json())
@@ -69,6 +71,7 @@ export default class AdminScreen extends React.Component {
       });
   };
 
+//Get admin user ID from the database
   getUserObject = (userId, cb) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
     return fetch(url)
@@ -82,6 +85,7 @@ export default class AdminScreen extends React.Component {
       });
   };
 
+//Get bikes being rented from database
   getRentals = (cb) => {
     return fetch('https://midd-bikeshare-backend.herokuapp.com/rentals/')
       .then((response) => response.json())
@@ -94,6 +98,7 @@ export default class AdminScreen extends React.Component {
       });
   };
 
+//UserID admin
   makeAdmin = (userId) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
     return fetch(url, {
@@ -117,8 +122,9 @@ export default class AdminScreen extends React.Component {
   keyExtractor = (item) => item._id;
 
 
-  
+
     render() {
+      //render buttons to manage bikes, users, or return to home screen
       return (
         <View style={{flex:1, justifyContent:'center', backgroundColor: 'purple'}}>
         <View style={styles.MainContainer}>
@@ -132,9 +138,9 @@ export default class AdminScreen extends React.Component {
           <TouchableOpacity style={styles.saveButton} onPress={()=>{this.navigate('Home')}}>
                 <Text style={styles.saveButtonText}>Return to Home</Text>
           </TouchableOpacity>
-          
 
-        
+
+
 
         </View>
         </View>

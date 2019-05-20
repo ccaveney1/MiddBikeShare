@@ -28,7 +28,8 @@ export default class BikesComponent extends React.Component {
     this.mounted = false;
   }
 
-
+//state in Admin bikes screen are the bikes in the system, user current latitude and longitude
+//and admin user input
   state = {
       bikes: [],
       latitude: null,
@@ -37,7 +38,8 @@ export default class BikesComponent extends React.Component {
   };
 
 
-
+//When the page loads, get the bikes from the database and set them in
+//the state
   componentDidMount() {
     this.mounted=true;
     this.getBikes(bikes => {
@@ -48,6 +50,7 @@ export default class BikesComponent extends React.Component {
   }
 
 
+//If the screen updates, get the bikes from the database
   componentDidUpdate() {
     this.getBikes(bikes => {
       if(this.mounted){
@@ -60,7 +63,7 @@ export default class BikesComponent extends React.Component {
     this.mounted=false;
   }
 
-  // get current location with permissions
+  // get current location with permissions, and set state
   _getLocationAsync = async () => {
     if(this.mounted){
       let { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -75,6 +78,8 @@ export default class BikesComponent extends React.Component {
   }
   };
 
+//Callback function to make a call to the database and get the all the bikes
+//in the database and return them into bikes
   getBikes = (cb) => {
     if(this.mounted){
       return fetch('https://midd-bikeshare-backend.herokuapp.com/bikes/')
@@ -87,10 +92,10 @@ export default class BikesComponent extends React.Component {
         console.error(error);
       });
     }
-      
+
   };
 
-
+//Callback function to database to get admin user information
   getUserObject = (userId, cb) => {
     if(this.mounted){
       let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
@@ -106,6 +111,8 @@ export default class BikesComponent extends React.Component {
       }
   };
 
+//If the admin would like to change the status of the bike, change to whatever
+//is clicked by the admin and update database
   updateBikeStatus = (bikeId, bikeStatus) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/bikes/'.concat(bikeId);
     return fetch(url, {
@@ -120,6 +127,8 @@ export default class BikesComponent extends React.Component {
     });
   };
 
+//If admin chooses to update the location of the bike to their location, update
+//location of bike in the database
   updateBikeLocation = (bikeId) => {
     this._getLocationAsync().then(() => {
       let url = 'https://midd-bikeshare-backend.herokuapp.com/bikes/'.concat(bikeId);
@@ -134,9 +143,11 @@ export default class BikesComponent extends React.Component {
           currentLongitude: this.state.longitude,
         })
       });
-    }); 
+    });
   };
 
+//If admin chooses to update the user of the bike to them, update user ID in
+//the database
   updateBikeUser = (bikeId) => {
     AsyncStorage.getItem('user_id').then((user_id) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/bikes/'.concat(bikeId);
@@ -153,6 +164,8 @@ export default class BikesComponent extends React.Component {
     })
   };
 
+//If admin adds a bike to the database, add given label and set the rest of the
+//information as if the admin user were renting it
   addBike = (label) => {
     this._getLocationAsync().then(() => {
       AsyncStorage.getItem('user_id').then((user_id) => {
@@ -175,6 +188,7 @@ export default class BikesComponent extends React.Component {
     })
   };
 
+//Delete bike from database if admin removes bike on the screen
   deleteBike = (bikeId) => {
     let url = 'https://midd-bikeshare-backend.herokuapp.com/bikes/'.concat(bikeId);
     return fetch(url, {
@@ -187,14 +201,14 @@ export default class BikesComponent extends React.Component {
   };
 
 
-
+//This is the card style for each bike in the database
   BikeItem = (item) => {
       return(
         <View style={styles.modalView}>
-            <Text style={styles.item}> 
+            <Text style={styles.item}>
                 Bike Number {item.label}
             </Text>
-            <TouchableHighlight 
+            <TouchableHighlight
             style={styles.buttonStyleLocation}
             onPress={()=>{
               this.getUserObject(item.currentUser, (userObject => {
@@ -223,7 +237,7 @@ export default class BikesComponent extends React.Component {
             </TouchableHighlight>
             <Text>Update Status:</Text>
             <View style={styles.statusButtonsView}>
-            <TouchableHighlight 
+            <TouchableHighlight
             style={[(item.status === 'Available') ? styles.buttonStyleHighlight : styles.buttonStyle]}
             onPress={()=>{
               Alert.alert(
@@ -243,7 +257,7 @@ export default class BikesComponent extends React.Component {
               )}}>
               <Text style={styles.buttonText}>Available</Text>
             </TouchableHighlight>
-            <TouchableHighlight 
+            <TouchableHighlight
             style={[(item.status === 'Rented') ? styles.buttonStyleHighlight : styles.buttonStyle]}
             onPress={()=>{
               Alert.alert(
@@ -263,7 +277,7 @@ export default class BikesComponent extends React.Component {
               )}}>
               <Text style={styles.buttonText}>Rented</Text>
             </TouchableHighlight>
-            <TouchableHighlight 
+            <TouchableHighlight
             style={[(item.status === 'Damaged') ? styles.buttonStyleHighlight : styles.buttonStyle]}
             onPress={()=>{
               Alert.alert(
@@ -283,7 +297,7 @@ export default class BikesComponent extends React.Component {
               )}}>
               <Text style={styles.buttonText}>Damaged</Text>
             </TouchableHighlight>
-            <TouchableHighlight 
+            <TouchableHighlight
             style={[(item.status === 'Missing') ? styles.buttonStyleHighlight : styles.buttonStyle]}
             onPress={()=>{
               Alert.alert(
@@ -305,7 +319,7 @@ export default class BikesComponent extends React.Component {
             </TouchableHighlight>
             </View>
             <Text>Location: {item.currentLatitude}, {item.currentLongitude}</Text>
-            <TouchableHighlight 
+            <TouchableHighlight
             style={styles.buttonStyleLocation}
             onPress={()=>{
               Alert.alert(
@@ -357,7 +371,7 @@ export default class BikesComponent extends React.Component {
   keyExtractor = (item) => item._id;
 
 
-  
+  //main screen style
     render() {
       return (
         <View style={{flex:1, justifyContent:'center', backgroundColor: 'purple'}}>
@@ -406,15 +420,15 @@ export default class BikesComponent extends React.Component {
             maxLength = {3}
           />
       </View>
-      
-  
+
+
        <FlatList
-          data={ this.state.bikes }   
+          data={ this.state.bikes }
           keyExtractor={this.keyExtractor}
           renderItem={({item}) => this.BikeItem(item)}
         />
 
-        
+
 
         </View>
         </View>
@@ -424,10 +438,10 @@ export default class BikesComponent extends React.Component {
 
 
 
-
+//style for all the various buttons
 const styles = StyleSheet.create({
     MainContainer :{
- 
+
         // Setting up View inside content in Vertically center.
         justifyContent: 'center',
         flex:1,
@@ -482,12 +496,12 @@ const styles = StyleSheet.create({
         buttonText: {
           color: 'white',
         },
-         
+
         item: {
             padding: 10,
             fontSize: 18,
           },
-        
+
           modalView: {
             backgroundColor:'white',
             width: 380,
