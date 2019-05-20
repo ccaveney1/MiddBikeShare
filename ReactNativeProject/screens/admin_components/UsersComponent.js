@@ -107,15 +107,12 @@ export default class UsersComponent extends React.Component {
 
   updateStrikes = (userId, addBool) => {
     this.getUserObject(userId, (user) => {
-        console.log(user);
         let strikes = user.strikes;
-        console.log(strikes);
         if(addBool) {
             strikes = strikes + 1;
         }else{
             strikes = strikes - 1;
         }
-        console.log(strikes);
         let url = 'https://midd-bikeshare-backend.herokuapp.com/users/'.concat(userId);
         return fetch(url, {
         method: 'POST',
@@ -174,8 +171,9 @@ export default class UsersComponent extends React.Component {
                 <TouchableHighlight 
                 style={styles.buttonStyleLocation}
                 onPress={()=>{
+                    console.log(item);
                     Alert.alert(
-                        item._last_name + ', ' + item.first_name,
+                        item.last_name + ', ' + item.first_name,
                         'Would you like to update user\'s admin privileges to '+ !item.admin + '?',
                         [
                             {text: 'Yes', onPress: () => {

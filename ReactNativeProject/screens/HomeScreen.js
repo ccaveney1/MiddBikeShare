@@ -43,22 +43,11 @@ export default class HomeScreen extends React.Component {
     userId: null, //unique userId in database
     latitude: null,
     longitude: null,
-    markers: [{
-          title: 'Bike 6',
-          coordinates: {
-            latitude: 44.009690,
-            longitude: -73.177175
-          },
-          id: '1'
-        },
-        {
-          title: 'Bike 7',
-          coordinates: {
-            latitude: 44.01,
-            longitude: -73.178
-          },
-          id: '2'
-        }]
+    markers: [{coordinates: {
+      latitude: 0,
+      longitude:0
+    }}],
+    markersLoaded: false
   };
 
   // set first name, user id, and available bikes in state as soon as component mounts
@@ -253,26 +242,25 @@ export default class HomeScreen extends React.Component {
       <View style={styles.container}>
       <Text style={{fontSize: 30, color:'purple', textAlign: 'center', paddingTop: 50, paddingBottom:20}}>Welcome {this.state.name}</Text>
       <Text style={{fontSize: 20, color:'purple', textAlign: 'center', paddingBottom:20}}>Choose a bike to start riding!</Text>
-        <MapView
-          style={{ flex: 1 }}
-          initialRegion={{
-            latitude: 44.009690,
-            longitude: -73.177175,
-            latitudeDelta: 0.0052,
-            longitudeDelta: 0.011,
-          }}>{this.state.markers.map((marker, index) => (
+      <MapView
+          style={{ flex: 1 }}
+          initialRegion={{
+            latitude: 44.009690,
+            longitude: -73.177175,
+            latitudeDelta: 0.0052,
+            longitudeDelta: 0.011,
+          }}>{this.state.markers.map((marker, index) => (
             <MapView.Marker
             coordinate={marker.coordinates}
             key={index}
             title={marker.title}
             pinColor = {'purple'}
             identifier = {marker.id}
-            onSelect={e => console.log(e.nativeEvent)}
+            //onSelect={e => console.log(e.nativeEvent)}
             onPress={() => {
+              this.setModalVisible(!this.state.modalVisible);
               this._getLocationAsync();
-              this.selectBike("5cc76f7f2a9171f49a6212be").then(() => {
-                this.setModalVisible(!this.state.modalVisible);
-              })   
+              this.selectBike(marker.id);
               }}
             ><Image source={require('./bike.png')} style={{height: 35, width:35, }}/></MapView.Marker>
           ))}</MapView>
